@@ -1,0 +1,199 @@
+# toolchain
+
+## ADDED Requirements
+
+### Requirement: Four blocking pre-commit checks per language
+
+`pre-commit` SHALL be installed natively in every repository, and SHALL run four
+blocking checks for each language present, over the **whole tree** — tests, scripts,
+configuration and documentation included:
+
+1. **Vulnerability scan** of the dependency graph, failing on any known advisory of
+   moderate severity or above.
+2. **Dependency freshness**, blocking — measured as *unattended drift*, not as
+   instantaneous lag. A dependency fails the commit when the bump pull request
+   Renovate opened for it has been open for more than fourteen days. Failing on any
+   lag at all would deadlock the repository: the very pull request that raises a
+   version could not be committed while the version is still behind.
+3. **Linter and formatter** for the language.
+4. **`cspell` with `language: en`.**
+
+There SHALL be no opt-out and no bypass instruction. A blocking hook signals a root
+cause to fix; a systematic false positive SHALL be answered by refining the
+detection, never by disabling it.
+
+#### Scenario: a vulnerable transitive dependency stops the commit
+- **GIVEN** a transitive package with a published advisory
+- **WHEN** the developer commits
+- **THEN** the scan fails, naming the package, the advisory and the path to it
+
+#### Scenario: the same checks run in CI
+- **GIVEN** a commit pushed without hooks installed
+- **WHEN** CI runs
+- **THEN** `pre-commit run --all-files` executes the identical set and fails identically
+
+### Requirement: Uniform script facade, one verb per action
+
+Each repository SHALL expose the same thin `bash` scripts, at the same location,
+with exit code 0 or non-zero and no interactive prompt: `setup-env`, `build`,
+`test`, `run`, `package`, `lint`, `format`, `coverage`, `e2e`, `clean`, `publish`.
+
+Behind the facade, plain `dotnet` SHALL be used. Build semantics — target
+frameworks, analyzers, deterministic build, SourceLink, thresholds, packaging
+metadata — SHALL live in `Rinzler78.Build`, a props/targets package auto-imported
+on restore, so that they apply identically under F5 in an IDE and in CI.
+
+NUKE SHALL appear only in `Meta`, the sole place where orchestration is real.
+
+#### Scenario: IDE and CI agree
+- **GIVEN** a rule violated by the code
+- **WHEN** the developer builds in the IDE
+- **THEN** the same error appears as in CI, because both read the same targets
+
+### Requirement: `setup-env` converges the machine to a declared toolchain
+
+Each tool SHALL be declared in its native manifest — `global.json` for the SDK and
+the workload set, `.config/dotnet-tools.json` for .NET tools, `mise.toml` for the
+JDK, Node and the Android SDK — and `setup-env` SHALL orchestrate them.
+
+Activation SHALL be **per directory** through `mise`: nothing global is overwritten,
+and two repositories requiring two JDKs coexist. Xcode is the exception: it cannot
+be installed by a script, and `setup-env` SHALL verify it and fail with instructions.
+
+`setup-env --check` SHALL be non-mutating and SHALL be a CI gate.
+
+#### Scenario: two repositories, two JDKs
+- **GIVEN** two repositories declaring different JDK versions
+- **WHEN** the developer moves between their directories
+- **THEN** each shell resolves its own JDK, and neither machine-wide default changes
+
+### Requirement: Release enables every optimisation the project supports
+
+Debug SHALL serve diagnosability: no optimisation, full symbols,
+`AndroidFastDeploymentType=AssembliesOnly`, Hot Reload.
+
+Release SHALL enable everything the project can enable — full R8 and profiled AOT on
+Android, AOT and LLVM on iOS, WASM AOT and Brotli on Blazor, ReadyToRun or Native AOT
+on server demonstrations, deterministic build, SourceLink, symbol packages, and
+warnings as errors on every project — samples included, per `coding-principles`.
+
+Costly optimisations — WASM AOT, Android profiled AOT, iOS LLVM — SHALL NOT run on
+`feature/*` pull requests; they run on the pull request to `master`, on the nightly
+job, and on release.
+
+#### Scenario: a fast pull request is still a faithful one
+- **GIVEN** a pull request on a feature branch
+- **WHEN** CI runs
+- **THEN** Release is built without costly AOT, and the nightly job covers it
+
+### Requirement: Package versions are centralised and restore is locked
+
+Each repository SHALL use central package management through
+`Directory.Packages.props`, and SHALL commit `packages.lock.json` for every project.
+CI SHALL restore with `--locked-mode`, so an unintended version drift fails the
+build rather than being silently absorbed.
+
+#### Scenario: an unlocked drift fails
+- **GIVEN** a pull request that changes a version in `Directory.Packages.props`
+  without regenerating the lock files
+- **WHEN** CI restores with `--locked-mode`
+- **THEN** restore fails, and `lockfile-sync` regenerates the lock on bot branches
+
+### Requirement: Specifications name libraries, versions live in the manifest
+
+A requirement SHALL name the library it mandates and the property that motivated the
+choice, never its current version. Concrete versions SHALL live in
+`Directory.Packages.props` and the lock files, where Renovate maintains them.
+
+Writing a current version into a requirement would make every routine dependency
+bump an OpenSpec change, and would put the specification in direct conflict with the
+dependency-freshness gate that requires those bumps to land unattended. A
+specification that has to be edited to stay true is a specification that will stop
+being true.
+
+Two exceptions SHALL hold, and both are deliberate freezes rather than current
+values: the HERE SDK artefacts pinned per column, whose raise is a proposal by
+design, and the frozen Xamarin toolchain with its pinned Xcode. A version that is
+itself the decision belongs in the specification; a version that merely happens to
+be the latest does not.
+
+#### Scenario: a routine bump does not touch the specification
+- **GIVEN** Renovate raises the assertion library by one minor version
+- **WHEN** the pull request is reviewed
+- **THEN** it changes `Directory.Packages.props` and the lock file alone
+- **AND** no requirement is edited
+
+#### Scenario: a deliberate freeze stays written down
+- **GIVEN** a proposal raising the pinned HERE Android artefact
+- **WHEN** it is authored
+- **THEN** the specification records the version, because the pin is the decision
+
+### Requirement: The Xamarin toolchain is frozen and operated deliberately
+
+No GitHub-hosted runner carries Xcode 15 after 2 November 2026, and
+`Component.Xamarin` was removed from the Windows Server 2025 image. The Xamarin
+target frameworks SHALL therefore build on a self-hosted runner with Xcode 15.4
+pinned.
+
+Four conditions SHALL hold, without which this reads as neglect rather than
+stewardship:
+
+1. A dated ADR recording the market survey — `macos-13` retired December 2025,
+   `macos-14` unsupported 2 November 2026, Bitrise retiring Xcode 15.x on
+   16 September 2026, Azure DevOps consuming the same images, and Apple's licence
+   permitting two virtual machines per Apple host.
+2. A job that **verifies** the runner reports Xcode 15.4 and fails if it moves.
+3. A disjoint matrix, so that an unavailable self-hosted runner never blocks a pull
+   request on a portable repository.
+4. A written exit condition stating when Xamarin leaves the scope.
+
+The self-hosted machine SHALL carry the Xamarin column and nothing else. The two
+generations are separated by two major operating system versions, not by two Xcode
+minors: the current .NET 10 iOS servicing release requires Xcode 26.6, which
+requires macOS 26.2, while Xcode 15.4 dates from May 2024. The modern iOS heads
+SHALL therefore build on GitHub-hosted macOS images, which carry the required Xcode.
+
+Neither generation SHALL be moved onto the other's machine. Installing both Xcode
+versions side by side and selecting one per job would keep a May 2024 Xcode running
+on a 2026 operating system, unsupported by Apple and with no recourse the day it
+stops launching, since that version will no longer be signed. It would also require
+keeping current a machine whose entire purpose is to stay frozen: a runner that is
+updated is no longer a frozen runner. Virtualising a second macOS on the same Apple
+host stays available as a fallback — Apple's licence permits two virtual machines
+per host — but SHALL NOT be adopted while a hosted image does the work.
+
+#### Scenario: the modern heads never touch the frozen machine
+- **GIVEN** a pull request building a `net10.0-ios` head
+- **WHEN** the workflow selects its runner
+- **THEN** it runs on a GitHub-hosted macOS image
+- **AND** the self-hosted runner is not solicited
+
+#### Scenario: the freeze is tested, not believed
+- **GIVEN** the self-hosted runner
+- **WHEN** its Xcode version changes
+- **THEN** the verification job fails before any build is attempted
+
+### Requirement: Self-hosted runners are never reachable from a fork
+
+GitHub advises against self-hosted runners on public repositories because a fork
+can execute arbitrary code on the machine. The mitigation SHALL be structural, not
+a setting.
+
+Self-hosted jobs SHALL be conditioned on
+`github.event.pull_request.head.repo.full_name == github.repository`, and SHALL run
+on `push`, on schedule and on `workflow_dispatch`. The runner SHALL be ephemeral,
+SHALL run under a dedicated macOS account with no access to personal keychains, and
+`pull_request_target` SHALL be forbidden — verified by a check.
+
+#### Scenario: a fork pull request never reaches the machine
+- **GIVEN** a pull request opened from a fork
+- **WHEN** its workflows are scheduled
+- **THEN** only hosted jobs run, and every self-hosted job is skipped
+
+#### Scenario: an unavailable runner blocks only what it owns
+- **GIVEN** the self-hosted runner is offline
+- **WHEN** a pull request touching a Xamarin target framework is opened
+- **THEN** its Xamarin job queues and the pull request cannot merge — the frozen
+  chain accepts blocking rather than being waved through
+- **AND** a pull request on a portable repository merges normally, its matrix
+  containing no self-hosted job

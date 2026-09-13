@@ -1,0 +1,4 @@
+[submodule "repos/Rinzler78.Toolkit"]
+	path = repos/Rinzler78.Toolkit
+	url = https://github.com/Rinzler78/Rinzler78.Toolkit.git
+	branch = develop
