@@ -39,6 +39,7 @@ public before extraction is complete.
       with `language: en` over the whole tree — `mise.toml` and the `setup-env`
       script with its non-mutating `--check` mode,
       `Directory.Packages.props` and lock files with `--locked-mode` in CI,
+      a `README.md` with the required sections and the check that keeps it true,
       `.github/ISSUE_TEMPLATE/`, the thirteen labels, Release Please, the
       `lockfile-sync` workflow, the ruleset definition, DocFX, the script facade,
       and a `net10.0` xUnit v3 test project at `tests/<PackageId>.Tests` — the

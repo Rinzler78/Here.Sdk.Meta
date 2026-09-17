@@ -154,6 +154,42 @@ release that adds public surface fails the test until the projection catches up.
 - **WHEN** CI runs the API-coverage test against the new artefact
 - **THEN** every newly added public type is reported as unprojected
 
+### Requirement: Every repository carries a README, and a check keeps it true
+
+Every repository SHALL carry a `README.md`, written in the **initial commit** rather
+than added later, and SHALL keep it true as the repository changes.
+
+A README is the first thing a visitor sees and frequently the only thing. On an
+ecosystem whose purpose is to demonstrate craft, an empty landing page cancels the
+benefit of the code beneath it.
+
+Existence SHALL NOT be the check, because a document that describes a command which
+no longer exists is worse than an absent one: a reader acts on it. A blocking check
+SHALL assert, at minimum:
+
+- the required sections are present — what the repository is, how to run it, and
+  under what licence;
+- every script verb present in `scripts/` is named in the README;
+- every script the README names exists.
+
+The last two directions are both needed: they catch the two ways a README rots — a
+capability added without being documented, and a capability removed while its
+documentation survives.
+
+For a repository that publishes a package, the `README.md` shipped inside the
+`.nupkg` SHALL be the repository's own, so that the page on nuget.org cannot drift
+from the page on GitHub.
+
+#### Scenario: an undocumented verb fails the build
+- **GIVEN** a new script added under `scripts/`
+- **WHEN** the README check runs without the README mentioning it
+- **THEN** the build fails, naming the verb
+
+#### Scenario: a removed script leaves no lie behind
+- **GIVEN** a README naming `scripts/deploy.sh`, which has been deleted
+- **WHEN** the README check runs
+- **THEN** the build fails, naming the script that does not exist
+
 ### Requirement: The public API is documented and the documentation is built
 
 Every public type and member SHALL carry XML documentation. `CS1591` SHALL be an
