@@ -12,15 +12,16 @@ SHALL remain `Here.Sdk.*`. Only `<PackageId>` carries the prefix.
 - **WHEN** a consumer adds `using Here.Sdk;`
 - **THEN** the types resolve
 
-### Requirement: The ecosystem is eighteen repositories and twenty-eight packages
+### Requirement: The ecosystem is nineteen repositories and twenty-nine packages
 
-The ecosystem SHALL consist of exactly eighteen repositories publishing exactly
-twenty-eight packages, as enumerated below. Any addition or removal SHALL require
+The ecosystem SHALL consist of exactly nineteen repositories publishing exactly
+twenty-nine packages, as enumerated below. Any addition or removal SHALL require
 an OpenSpec change.
 
 | Repository | Packages |
 |---|---|
-| `Rinzler78.Toolkit` | `Rinzler78.Templates`, `Rinzler78.Build` |
+| `Rinzler78.Toolkit` | `Rinzler78.Templates`, `Rinzler78.Build` — **domain-agnostic**; this ecosystem is its first consumer, not its subject |
+| `Here.Sdk.Build` | `Build` — the domain specialisation: the layer vocabulary and the non-affiliation fragment |
 | `Here.Sdk.Meta` | none — orchestration cockpit, public |
 | `Here.Sdk.Common` | `Common` |
 | `Here.Sdk.Abstractions` | `Abstractions`, `.Navigation`, `.Offline`, `.Testing` |
@@ -52,7 +53,7 @@ the realisation order is complete.
 #### Scenario: an incomplete ecosystem does not fail the audit
 - **GIVEN** realisation has reached phase 4 and eleven packages are published
 - **WHEN** the ecosystem audit runs
-- **THEN** it reports eleven of twenty-eight published, without raising a failure
+- **THEN** it reports eleven of twenty-nine published, without raising a failure
 
 ### Requirement: The target framework matrix is complete on both layers
 
@@ -103,7 +104,13 @@ in its `README.md`, a statement that it is not affiliated with, endorsed by, or
 supported by HERE Technologies, and that consumers must obtain their own HERE
 credentials and comply with HERE's Developer Agreement independently.
 
-Publishing twenty-eight packages named `Here.Sdk.*` without that statement is a
+The statement SHALL be enforced by `Here.Sdk.Build`, which declares it as the
+required description fragment of the generic mechanism in `Rinzler78.Build`. It
+SHALL NOT live in the agnostic package: a toolkit published under a personal prefix
+cannot impose a third party's commercial notice on consumers who have nothing to do
+with that third party.
+
+Publishing twenty-nine packages named `Here.Sdk.*` without that statement is a
 trademark and expectation risk, not a formality.
 
 #### Scenario: the disclaimer travels with the package

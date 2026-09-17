@@ -21,15 +21,15 @@ public before extraction is complete.
 
 ## Phase 1 — Toolkit and cockpit
 
-- [x] 1.1 `Rinzler78.Toolkit` — harness written by hand (skills pending, issue #1)
-- [ ] 1.2 `Rinzler78.Build` — props/targets: target framework sets, analysers,
-      `TreatWarningsAsErrors`, deterministic build, `ContinuousIntegrationBuild`,
-      SourceLink, `.snupkg` symbols, XML documentation with `CS1591` as error,
-      `<HereTrimContract>`, `<HereCoverageContract>`, the non-affiliation
-      `<Description>` fragment, the executable Clean Architecture check, and
-      `Microsoft.CodeAnalysis.PublicApiAnalyzers` wired on every project that
-      ships a public surface, with `PublicAPI.Shipped.txt` and
-      `PublicAPI.Unshipped.txt` committed
+- [x] 1.1 `Rinzler78.Toolkit` — harness written by hand, domain-agnostic
+      (skills pending, issue #1)
+- [ ] 1.2 `Rinzler78.Build` — props/targets, domain-agnostic: named target
+      framework sets, analysers, `TreatWarningsAsErrors`, deterministic build,
+      `ContinuousIntegrationBuild` following the environment, SourceLink, `.snupkg`
+      symbols, XML documentation with `CS1591` as error, `<RinzlerTrimContract>`,
+      `<RinzlerCoverageContract>`, and the mechanisms the domain declares against —
+      layer vocabulary and validation, forbidden dependencies, required analysers,
+      required description fragment. A project declaring no policy builds
 - [ ] 1.3 `Rinzler78.Templates` — `rinzler-lib`, `rinzler-binding`, `rinzler-app`,
       each expanding: the seventeen skills in `.agents/skills/` and
       `.claude/skills/`, `CLAUDE.md` and `AGENTS.md` with the agreement check,
@@ -45,29 +45,34 @@ public before extraction is complete.
       single test framework of the ecosystem, no project targeting a platform
       moniker — wired to `AwesomeAssertions`, `NSubstitute` and
       `NSubstitute.Analyzers.CSharp`
-- [ ] 1.4 Regenerate the Toolkit harness from its own template; assert byte identity
-- [ ] 1.5 Publish both packages
-- [ ] 1.6 Request the `Rinzler78.` prefix reservation. This does not wait on
+- [ ] 1.4 `Here.Sdk.Build` — the domain specialisation: the layer vocabulary of the
+      eight-layer map, the forbidden dependencies of the inward layers, the required
+      analysers, and the HERE non-affiliation fragment, all declared through the
+      generic mechanism of `Rinzler78.Build`. Verified by a scratch consumer, since
+      a props/targets package never imports itself
+- [ ] 1.5 Regenerate the Toolkit harness from its own template; assert byte identity
+- [ ] 1.6 Publish the three packages
+- [ ] 1.7 Request the `Rinzler78.` prefix reservation. This does not wait on
       phase 1: `Rinzler78.CometBFT.Client` is already published under the same
       owner, so the reservation prerequisite is met today. The search index
       reports the prefix as unverified, meaning no reservation exists yet
-- [ ] 1.7 `Meta` — generated from the template, made public
-- [ ] 1.8 `Meta` — founding ADRs: poly-repository rationale, public visibility,
+- [ ] 1.8 `Meta` — generated from the template, made public
+- [ ] 1.9 `Meta` — founding ADRs: poly-repository rationale, public visibility,
       templates generated not synchronised, frozen Xamarin toolchain, deferred Linux
       desktop, self-hosted runner isolation, deliberate absence of `CODEOWNERS`
-- [ ] 1.9 `Meta` — every repository added as a submodule under `repos/<name>`
+- [ ] 1.10 `Meta` — every repository added as a submodule under `repos/<name>`
       tracking `develop`, and the nightly refreshing them with
       `git submodule update --remote` before building, so it builds the tips
-- [ ] 1.10 `Meta` — NUKE orchestrator skeleton, aggregated board, gallery page,
+- [ ] 1.11 `Meta` — NUKE orchestrator skeleton, aggregated board, gallery page,
       nightly integration job, ninety-day secret rotation reminder, and the HERE
       SDK release detection job reading `heremaps/here-sdk-examples` releases through
       the GitHub API against a committed cursor, opening a `needs-triage`/`chore`
       issue in the affected binding repository and linking — never parsing — the
       documentation release notes
-- [ ] 1.11 `Meta` — separate detection for the JavaScript column, which versions
+- [ ] 1.12 `Meta` — separate detection for the JavaScript column, which versions
       independently on `js.api.here.com`, is absent from the examples repository and
       returns 404 on the npm registry
-- [ ] 1.12 `Meta` — the **ecosystem audit**: catalogue containment, demonstration
+- [ ] 1.13 `Meta` — the **ecosystem audit**: catalogue containment, demonstration
       coverage, task-box truth, ADR integrity and dead deny rules, harness drift,
       and version literals in specifications — a requirement naming a concrete
       version that is not one of the two declared freezes is reported

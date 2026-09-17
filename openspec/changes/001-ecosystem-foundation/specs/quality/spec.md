@@ -6,14 +6,15 @@
 
 Coverage floors, mutation scores, trimming contracts, API documentation,
 API-coverage tests and the committed public API baseline of `sdk-updates` all
-presuppose a compiled assembly with a public surface. Two repositories have none,
+presuppose a compiled assembly with a public surface. Three repositories have none,
 and SHALL be exempt from those six gates rather than made to fail requirements they
 cannot satisfy:
 
 | Repository | Why |
 |---|---|
 | `Here.Sdk.Meta` | Publishes no package. Its only code is the NUKE orchestrator, verified by the cascade actually propagating, and by its own unit tests where it has logic. |
-| `Rinzler78.Toolkit` | Ships a props/targets package and a `dotnet new` template pack, neither of which produces an assembly with a public API. Its verification is that it regenerates its own harness byte-identically, and that eighteen repositories import it and behave identically in IDE and CI. |
+| `Here.Sdk.Build` | Ships a props/targets package declaring the domain's layer vocabulary and non-affiliation fragment. Its verification is that a project violating either cannot build, exercised by a scratch consumer. |
+| `Rinzler78.Toolkit` | Ships a props/targets package and a `dotnet new` template pack, neither of which produces an assembly with a public API. Its verification is that it regenerates its own harness byte-identically, and that nineteen repositories import it and behave identically in IDE and CI. |
 
 Every other gate — analysers, warnings as errors, English, pre-commit, linear
 history, specification validation — SHALL apply to **all** repositories, these two
@@ -38,7 +39,7 @@ Partial trimming is the default on Blazor WebAssembly and on iOS, and trims only
 assemblies that opted in. `IsTrimmable` is therefore not a badge: it is the switch
 that makes a library shrink in every integrator's Release build.
 
-`Rinzler78.Build` SHALL provide the vocabulary as `<HereTrimContract>` with values
+`Rinzler78.Build` SHALL provide the vocabulary as `<RinzlerTrimContract>` with values
 `Committed`, `Analyzed` and `OutOfScope`. Each project SHALL choose its value,
 justified by an ADR in its own repository.
 
@@ -76,7 +77,7 @@ IPA size produced by CI with and without the library marked.
 
 ### Requirement: Coverage gates the diff, not the file
 
-`Rinzler78.Build` SHALL provide `<HereCoverageContract>` with three values, mirroring
+`Rinzler78.Build` SHALL provide `<RinzlerCoverageContract>` with three values, mirroring
 the trimming contract, and each project SHALL declare one:
 
 | Value | Floor | Applies to |

@@ -65,7 +65,7 @@ hand-written double drifts from the contract it imitates without anything failin
 
 ### Requirement: Platform assemblies are guaranteed without unit tests
 
-An assembly that carries only glue SHALL declare `<HereCoverageContract>Reduced` or
+An assembly that carries only glue SHALL declare `<RinzlerCoverageContract>Reduced` or
 `Exempt`, and SHALL be guaranteed by two mechanisms instead: the API-coverage test
 defined in `quality`, which asserts the projected surface against the upstream
 artefact, and the canonical user interface suite defined below.

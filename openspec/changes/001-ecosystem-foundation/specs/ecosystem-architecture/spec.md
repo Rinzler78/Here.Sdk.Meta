@@ -121,9 +121,18 @@ demonstrations, which are counted per package in `demonstration`.
 | 7 | Façade | `Standard` |
 | 8 | Cross-platform heads | `Blazor`, `Forms`, `Maui` |
 
-`Rinzler78.Build` and `Rinzler78.Templates` belong to no layer: they are toolchain
-artefacts rather than ecosystem packages. Their demonstration exemption is declared
-in `demonstration`, which remains the single authority on what needs a sample.
+`Rinzler78.Build`, `Rinzler78.Templates` and `Here.Sdk.Build` belong to no layer:
+they are toolchain artefacts rather than ecosystem packages. Their demonstration
+exemption is declared in `demonstration`, which remains the single authority on what
+needs a sample.
+
+The vocabulary of this table is itself data, not code. `Rinzler78.Build` supplies
+the mechanism that validates a layer and refuses an outward dependency;
+`Here.Sdk.Build` declares **which** layers exist and what each may not depend on;
+each repository declares, in its own generated `.props`, the single layer it sits
+in. Three levels, because the three things have three lifetimes: a mechanism that
+outlives the domain, a vocabulary shared by nineteen repositories, and a position
+that belongs to one.
 
 #### Scenario: a new package cannot exist outside the map
 - **GIVEN** a proposal adding a package
