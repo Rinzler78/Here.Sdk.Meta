@@ -58,7 +58,7 @@ public before extraction is complete.
       analysers, and the HERE non-affiliation fragment, all declared through the
       generic mechanism of `Rinzler78.Build`. Verified by a scratch consumer, since
       a props/targets package never imports itself
-- [ ] 1.5 Regenerate the Toolkit harness from its own template; assert byte identity
+- [x] 1.5 Regenerate the Toolkit harness from its own template; assert byte identity
       for every harness file, and presence only for the files the template declares
       as seeds — the README, the entry points, the solution, the central versions,
       the dictionary and the scaffold, whose content is repository-specific by
