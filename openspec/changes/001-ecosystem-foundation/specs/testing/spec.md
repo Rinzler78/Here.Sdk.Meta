@@ -170,3 +170,63 @@ unit tests, on the agent, with no device.
 - **GIVEN** a WPF host whose only content is a `BlazorWebView`
 - **WHEN** FlaUI runs
 - **THEN** it asserts the window opens and the WebView has loaded, nothing more
+
+### Requirement: The unit loop runs only what the change can reach
+
+A test-driven loop that costs minutes stops being run. The commit gate SHALL therefore
+run only the test projects the staged change can reach, and the selection SHALL be
+computed rather than declared: from the changed files, to the projects that own them,
+to every project that references those transitively, down to the test projects in that
+closure.
+
+The selection SHALL err towards running too much. A change to a build manifest, to the
+toolchain pin, to a lock file or to the script facade SHALL select every test project,
+because a selection that runs too little produces a green result that means nothing.
+
+The enumeration of projects SHALL come from the solution, not from every project file
+on disk: a repository that ships template content carries project files that are
+content rather than projects, and central package management does not apply to them.
+
+An empty selection SHALL be reported as such. "Nothing to run" and "everything passed"
+are different facts, and a loop that conflates them teaches a developer to trust a
+green that tested nothing.
+
+The same selection SHALL be available to the developer directly — for a branch's whole
+diff as well as for the staged change — and as a watched loop that re-runs it on every
+save.
+
+#### Scenario: a documentation change runs no test
+- **GIVEN** a commit that touches only `README.md`
+- **WHEN** the commit gate runs
+- **THEN** it reports that no test project is affected, and runs none
+
+#### Scenario: a change to a shared manifest runs everything
+- **GIVEN** a commit that touches `Directory.Packages.props`
+- **WHEN** the commit gate runs
+- **THEN** every test project is selected
+
+#### Scenario: a library change runs the tests of its consumers
+- **GIVEN** a change in a project that two other projects reference
+- **WHEN** the commit gate runs
+- **THEN** the test projects of both consumers are selected
+
+### Requirement: The test assembly is its own runner
+
+On the .NET 10 SDK band, `dotnet test` offers two paths and neither carries an xUnit v3
+assembly of the pinned version: the VSTest bridge is refused outright by
+Microsoft.Testing.Platform, and the platform runner discovers zero tests. The test
+project builds to an executable that discovers and runs its own tests, and the facade
+SHALL invoke that executable directly.
+
+Coverage SHALL be collected around the process rather than by a VSTest data collector,
+which has nothing to attach to in this chain and would silently collect nothing.
+
+#### Scenario: the facade does not depend on dotnet test
+- **GIVEN** a repository generated from the template
+- **WHEN** `./scripts/test.sh` runs
+- **THEN** the tests are executed by the test project itself and the result is reported
+
+#### Scenario: coverage is produced without VSTest
+- **GIVEN** the same repository
+- **WHEN** `./scripts/coverage.sh` runs
+- **THEN** a Cobertura report is written under `artifacts/coverage/`

@@ -30,7 +30,7 @@ public before extraction is complete.
       `<RinzlerCoverageContract>`, and the mechanisms the domain declares against —
       layer vocabulary and validation, forbidden dependencies, required analysers,
       required description fragment. A project declaring no policy builds
-- [ ] 1.3 `Rinzler78.Templates` — `rinzler-lib`, `rinzler-binding`, `rinzler-app`,
+- [x] 1.3 `Rinzler78.Templates` — `rinzler-lib`, `rinzler-binding`, `rinzler-app`,
       each expanding: the seventeen skills in `.agents/skills/` and
       `.claude/skills/`, `CLAUDE.md` and `AGENTS.md` with the agreement check,
       `.claude/settings.json` with the `PreToolUse` / `PostToolUse` / `Stop` hooks,
@@ -45,13 +45,24 @@ public before extraction is complete.
       and a `net10.0` xUnit v3 test project at `tests/<PackageId>.Tests` — the
       single test framework of the ecosystem, no project targeting a platform
       moniker — wired to `AwesomeAssertions`, `NSubstitute` and
-      `NSubstitute.Analyzers.CSharp`
+      `NSubstitute.Analyzers.CSharp`. The three templates SHALL share one physical
+      copy of the harness, each `.template.config` sourcing the shared directory,
+      and SHALL declare their seed files in the template itself. Three gates —
+      `pre-commit`, `pre-push`, `pre-merge-commit` — each running what it can afford,
+      with change-scoped test selection on the commit gate. `Rinzler78.Build` is
+      consumed as an **MSBuild project SDK**, pinned in `global.json`: a package
+      reference cannot deliver a named target-framework set, because restore needs
+      TargetFrameworks before the package's props exist
 - [ ] 1.4 `Here.Sdk.Build` — the domain specialisation: the layer vocabulary of the
       eight-layer map, the forbidden dependencies of the inward layers, the required
       analysers, and the HERE non-affiliation fragment, all declared through the
       generic mechanism of `Rinzler78.Build`. Verified by a scratch consumer, since
       a props/targets package never imports itself
 - [ ] 1.5 Regenerate the Toolkit harness from its own template; assert byte identity
+      for every harness file, and presence only for the files the template declares
+      as seeds — the README, the entry points, the solution, the central versions,
+      the dictionary and the scaffold, whose content is repository-specific by
+      construction
 - [ ] 1.6 Publish the three packages
 - [ ] 1.7 Request the `Rinzler78.` prefix reservation. This does not wait on
       phase 1: `Rinzler78.CometBFT.Client` is already published under the same
