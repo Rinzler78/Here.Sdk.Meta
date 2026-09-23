@@ -176,10 +176,18 @@ A blocking check SHALL refuse a commit that records a non-executable tracked scr
 and `setup-env` SHALL restore the mode. The hook configuration SHALL invoke its
 entry through `bash`, so that the check which reports the mode can itself run.
 
+The bootstrap SHALL be documented as `bash scripts/setup-env.sh`, not
+`./scripts/setup-env.sh`: on a fresh expansion the verb cannot execute itself, and a
+first command that fails with "permission denied" is the first thing a reader of the
+README meets. Every later invocation SHALL use the `./` form, which the restored mode
+makes correct.
+
 #### Scenario: a generated repository is usable before its first commit
-- **GIVEN** a repository freshly expanded from the template
-- **WHEN** `./scripts/setup-env.sh` runs
-- **THEN** every script under `scripts/` and `.claude/hooks/` is executable
+- **GIVEN** a repository freshly expanded from the template, whose scripts carry no
+  executable bit
+- **WHEN** `bash scripts/setup-env.sh` runs
+- **THEN** every script under `scripts/` and `.claude/hooks/` is executable, and
+  `./scripts/setup-env.sh --check` runs from then on
 
 #### Scenario: a non-executable script cannot be committed
 - **GIVEN** a script staged with mode `100644`

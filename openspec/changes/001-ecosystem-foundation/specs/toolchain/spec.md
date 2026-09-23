@@ -2,46 +2,63 @@
 
 ## ADDED Requirements
 
-### Requirement: Four blocking pre-commit checks per language
+### Requirement: Four blocking checks per language, each at the gate it belongs to
 
 `pre-commit` SHALL be installed natively in every repository, and SHALL run four
 blocking checks for each language present, over the **whole tree** — tests, scripts,
-configuration and documentation included:
+configuration and documentation included. Each check SHALL run at the gate its cost
+belongs to: a check that queries the network belongs to the push, because a commit
+that waits on an advisory database is a commit a developer learns to avoid. Blocking
+is about there being no way past the check, not about which gate holds it.
 
 1. **Vulnerability scan** of the dependency graph, failing on any known advisory of
-   moderate severity or above.
-2. **Dependency freshness**, blocking — measured as *unattended drift*, not as
+   moderate severity or above — at the **push** gate: it queries an advisory database
+   over the network.
+2. **Dependency freshness**, blocking, at the **push** gate for the same reason —
+   measured as *unattended drift*, not as
    instantaneous lag. A dependency fails the commit when the bump pull request
    Renovate opened for it has been open for more than fourteen days. Failing on any
    lag at all would deadlock the repository: the very pull request that raises a
    version could not be committed while the version is still behind.
-3. **Linter and formatter** for the language.
-4. **`cspell` with `language: en`.**
+3. **Linter and formatter** for the language — at the **commit** gate: offline and
+   fast.
+4. **`cspell` with `language: en`** — at the **commit** gate, for the same reason.
 
 There SHALL be no opt-out and no bypass instruction. A blocking hook signals a root
 cause to fix; a systematic false positive SHALL be answered by refining the
 detection, never by disabling it.
 
-#### Scenario: a vulnerable transitive dependency stops the commit
+#### Scenario: a vulnerable transitive dependency stops the push
 - **GIVEN** a transitive package with a published advisory
-- **WHEN** the developer commits
-- **THEN** the scan fails, naming the package, the advisory and the path to it
+- **WHEN** the developer pushes
+- **THEN** the scan fails, naming the package, the advisory and the path to it, and no
+  instruction to bypass it is offered
 
-#### Scenario: the same checks run in CI
+#### Scenario: the same checks run in CI, at every gate
 - **GIVEN** a commit pushed without hooks installed
 - **WHEN** CI runs
-- **THEN** `pre-commit run --all-files` executes the identical set and fails identically
+- **THEN** it executes the identical set across **every** gate, and fails identically —
+  a job that ran only the commit-stage hooks would let the network checks through
 
 ### Requirement: Uniform script facade, one verb per action
 
 Each repository SHALL expose the same thin `bash` scripts, at the same location,
-with exit code 0 or non-zero and no interactive prompt: `setup-env`, `build`,
-`test`, `run`, `package`, `lint`, `format`, `coverage`, `e2e`, `clean`, `publish`.
+with exit code 0 or non-zero and no interactive prompt: `setup-env`, `restore`,
+`build`, `test`, `coverage`, `watch`, `run`, `deploy`, `package`, `publish`, `docs`,
+`lint`, `format`, `checks`, `e2e`, `bench`, `clean`.
 
 Behind the facade, plain `dotnet` SHALL be used. Build semantics — target
 frameworks, analyzers, deterministic build, SourceLink, thresholds, packaging
-metadata — SHALL live in `Rinzler78.Build`, a props/targets package auto-imported
-on restore, so that they apply identically under F5 in an IDE and in CI.
+metadata — SHALL live in `Rinzler78.Build`, so that they apply identically under F5 in
+an IDE and in CI.
+
+`Rinzler78.Build` SHALL be consumed as an **MSBuild project SDK**, its version pinned
+once in `global.json`. A package reference cannot carry semantics a project reads while
+it is being evaluated: restore needs `TargetFrameworks` before the package's props
+exist, so a named target-framework set delivered that way evaluates to empty and NuGet
+reports an invalid framework identifier. The package SHALL also ship the props and
+targets under `build/`, so that a project which only references it still receives every
+semantic that is read after evaluation.
 
 NUKE SHALL appear only in `Meta`, the sole place where orchestration is real.
 

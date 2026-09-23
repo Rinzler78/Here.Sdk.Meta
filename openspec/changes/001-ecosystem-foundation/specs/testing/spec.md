@@ -186,6 +186,9 @@ because a selection that runs too little produces a green result that means noth
 The enumeration of projects SHALL come from the solution, not from every project file
 on disk: a repository that ships template content carries project files that are
 content rather than projects, and central package management does not apply to them.
+A change to the solution SHALL therefore select every test project — it can add a
+project, remove one, or alter the reference graph without any project file changing,
+and a selection computed from a stale graph is exactly the green that means nothing.
 
 An empty selection SHALL be reported as such. "Nothing to run" and "everything passed"
 are different facts, and a loop that conflates them teaches a developer to trust a
