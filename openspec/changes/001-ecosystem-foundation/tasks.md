@@ -23,7 +23,7 @@ public before extraction is complete.
 
 - [x] 1.1 `Rinzler78.Toolkit` — harness written by hand, domain-agnostic
       (skills pending, issue #1)
-- [ ] 1.2 `Rinzler78.Build` — props/targets, domain-agnostic: named target
+- [x] 1.2 `Rinzler78.Build` — props/targets, domain-agnostic: named target
       framework sets, analysers, `TreatWarningsAsErrors`, deterministic build,
       `ContinuousIntegrationBuild` following the environment, SourceLink, `.snupkg`
       symbols, XML documentation with `CS1591` as error, `<RinzlerTrimContract>`,
