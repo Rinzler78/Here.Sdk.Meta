@@ -279,3 +279,35 @@ integration artefact cannot be mistaken for a released version.
 - **GIVEN** a build of `develop`
 - **WHEN** it packs
 - **THEN** the version carries a `develop.<run>` prerelease suffix, and nothing is pushed
+
+### Requirement: A repository's forge settings are part of its bootstrap
+
+A repository is not provisioned when its files are committed: settings that live only in
+the forge decide whether its own workflows can run. They SHALL be applied when the
+repository is created, by the same automated step that creates it, and SHALL be verified
+by the ecosystem audit — a setting applied by hand once is a setting that differs on the
+nineteenth repository.
+
+At minimum:
+
+- **Default workflow permissions SHALL remain read-only.** A job that needs more declares
+  it, per job, in the workflow.
+- **Workflows SHALL be permitted to create pull requests.** Release Please prepares a
+  release as a pull request; without this the release run fails with *GitHub Actions is
+  not permitted to create or approve pull requests*, which no workflow can grant itself.
+- **Both long-lived branches SHALL carry their ruleset** — linear history, signed commits,
+  no force-push, no deletion, administrators included.
+
+The audit SHALL report a repository whose forge settings diverge from these, in the same
+way it reports harness drift: the settings are part of the harness, they simply do not
+live in the tree.
+
+#### Scenario: a freshly created repository can run its own release flow
+- **GIVEN** a repository created by the provisioning step
+- **WHEN** a push to `master` runs the release workflow
+- **THEN** Release Please opens its pull request, and the default token stays read-only
+
+#### Scenario: a hand-edited setting is reported
+- **GIVEN** a repository whose workflow permissions were widened by hand
+- **WHEN** the ecosystem audit runs
+- **THEN** it reports that repository and the setting that diverges
