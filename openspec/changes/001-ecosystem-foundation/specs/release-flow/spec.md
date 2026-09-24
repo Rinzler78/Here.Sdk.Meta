@@ -216,3 +216,66 @@ SHALL link them from the gallery.
 - **AND** neither attempts a store submission
 - **AND** a check fails the workflow if a store upload step is ever added to a
   Xamarin head
+
+### Requirement: Publication carries no long-lived credential
+
+Packages SHALL be published through nuget.org **trusted publishing**: the release job
+requests a short-lived OIDC token from the forge, nuget.org validates it against a
+policy naming the repository and the workflow file, and returns an API key valid for one
+hour.
+
+No **long-lived** credential SHALL exist: no registry key in a repository secret, a
+configuration file, a developer machine or a runner image. The short-lived key the
+exchange returns lives in the publishing job's environment for the duration of that job,
+is never written to a file, and is never passed to a step that does not push.
+
+A policy SHALL be registered per repository, permitted to push **new packages as well as
+new versions** — a scope limited to selected existing packages cannot push a new
+identifier, and every identifier in this ecosystem is new.
+
+A policy's scope SHALL name only the identifiers the repository it names publishes. A
+namespace-wide scope such as `Rinzler78.*` SHALL NOT be used: a policy is a grant to
+whatever workflow matches it, so a namespace-wide scope would let a compromise of any one
+repository publish or replace any package of the ecosystem. Where a single glob cannot
+express a repository's identifiers, that SHALL be one policy per identifier rather than
+one wider glob.
+
+The token SHALL be exchanged immediately before the push. It is valid for one hour, and a
+job that builds first and requests the key at its start would lose it between the pack
+and the push.
+
+The alternative — one account key copied into nineteen repositories — SHALL NOT be used.
+A personal account has no forge-level secret for workflows, so the per-repository work is
+identical either way, and nineteen copies of one credential expiring within a year is
+nineteen places to rotate and one to forget.
+
+#### Scenario: no repository holds a publishing credential
+- **GIVEN** any repository of the ecosystem
+- **WHEN** its secrets are listed
+- **THEN** none of them is a package-registry key
+
+#### Scenario: a compromised repository cannot reach another's packages
+- **GIVEN** a release workflow whose repository has been compromised
+- **WHEN** it requests a key and attempts to push a package another repository owns
+- **THEN** the exchange grants nothing for that identifier, because no policy scopes it
+  to this repository
+
+#### Scenario: a release published from an unregistered repository fails
+- **GIVEN** a repository with no trusted publishing policy
+- **WHEN** its release workflow requests a key
+- **THEN** the exchange is refused and nothing is published
+
+### Requirement: The version is written once, read everywhere
+
+Release Please SHALL write the computed version to a single file in the repository, and
+the packaging verb SHALL read it from there. No project file, command line or workflow
+SHALL carry a version of its own: a second source of version truth is the one that goes
+stale, and it goes stale silently.
+
+A package built outside a release SHALL carry a prerelease suffix, so that a continuous
+integration artefact cannot be mistaken for a released version.
+
+#### Scenario: a continuous integration build is not a release
+- **GIVEN** a build of `develop`
+- **WHEN** it packs
+- **THEN** the version carries a `develop.<run>` prerelease suffix, and nothing is pushed
