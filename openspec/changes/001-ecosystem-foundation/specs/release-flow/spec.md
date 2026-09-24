@@ -295,6 +295,10 @@ At minimum:
 - **Workflows SHALL be permitted to create pull requests.** Release Please prepares a
   release as a pull request; without this the release run fails with *GitHub Actions is
   not permitted to create or approve pull requests*, which no workflow can grant itself.
+  GitHub exposes creation and approval as **one** switch — the repository's
+  `can_approve_pull_request_reviews` workflow permission — so the invariant is that field
+  set to `true`, and the audit SHALL check that exact field. Approval is a side effect of
+  the switch, not a need: no ruleset requires a human or bot approval.
 - **Both long-lived branches SHALL carry their ruleset** — linear history, signed commits,
   no force-push, no deletion, administrators included.
 
@@ -311,3 +315,9 @@ live in the tree.
 - **GIVEN** a repository whose workflow permissions were widened by hand
 - **WHEN** the ecosystem audit runs
 - **THEN** it reports that repository and the setting that diverges
+
+#### Scenario: a repository whose workflows cannot open pull requests is reported
+- **GIVEN** a repository whose `can_approve_pull_request_reviews` workflow permission is
+  `false`
+- **WHEN** the ecosystem audit runs
+- **THEN** it reports the repository, naming that field, before a release run fails on it
