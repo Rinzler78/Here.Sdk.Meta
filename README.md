@@ -44,7 +44,13 @@ specification says so and explains why.
 ## Layout
 
     openspec/changes/   the specification, as OpenSpec change proposals
+    docs/runbooks/      procedures carried out outside any tree — forge settings,
+                        registry policies — written down the first time they are done
     repos/              every repository of the ecosystem, as a git submodule
+
+`docs/runbooks/nuget-publication.md` gives a repository the right to publish: its forge
+settings, its `release` environment, and its keyless nuget.org policy, with the traps
+the first repository met.
 
 Submodules track `develop`. The commit a submodule pins is a bootstrap default, not
 a dependency: the nightly refreshes them to the tips before building, because a pin
