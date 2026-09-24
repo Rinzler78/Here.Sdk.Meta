@@ -4,9 +4,11 @@ The procedure, and the reasons behind each step, for giving one repository of th
 ecosystem the ability to publish its packages. It was first carried out on
 `Rinzler78.Toolkit` on 2026-09-24, and every trap below was met there.
 
-Publication is **keyless**: nuget.org trusted publishing over GitHub OIDC. No API key
-exists — not in a repository secret, not on a machine. Each step below closes a specific
-way in which that could go wrong; none of them is optional.
+Publication uses nuget.org trusted publishing over GitHub OIDC: **no long-lived key
+exists** — not in a repository secret, not on a machine. The only key is the one the
+exchange returns, valid for one hour, held in the publishing job's environment for the
+duration of that job and never written anywhere. Each step below closes a specific way in
+which that could go wrong; none of them is optional.
 
 ## What the template already provides
 
@@ -122,7 +124,8 @@ window; a public repository's policy is active immediately.
 ## The ID prefix reservation
 
 Done once for the whole ecosystem, not per repository. There is no form: the documented
-procedure is an e-mail to `account@nuget.org` naming the owner display name (`Rinzler78`)
+procedure (nuget.org documentation, *ID Prefix Reservation*, "application process") is an
+e-mail to NuGet's public account team, `account@nuget.org`, naming the owner display name (`Rinzler78`)
 and the prefix (`Rinzler78.*`, private, no delegation), with evidence against the three
 acceptance criteria. Send it **from the address registered on the nuget.org account**,
 since the team may need to verify the requester's identity.
