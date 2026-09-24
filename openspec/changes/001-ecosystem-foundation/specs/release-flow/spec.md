@@ -222,12 +222,23 @@ SHALL link them from the gallery.
 Packages SHALL be published through nuget.org **trusted publishing**: the release job
 requests a short-lived OIDC token from the forge, nuget.org validates it against a
 policy naming the repository and the workflow file, and returns an API key valid for one
-hour. No API key SHALL be stored in a repository secret, a file, or a machine.
+hour.
 
-One policy SHALL be registered per repository, scoped to the glob `Rinzler78.*` with
-permission to push **new packages as well as new versions**. A scope limited to selected
-existing packages cannot push a new identifier, and every identifier in this ecosystem
-is new.
+No **long-lived** credential SHALL exist: no registry key in a repository secret, a
+configuration file, a developer machine or a runner image. The short-lived key the
+exchange returns lives in the publishing job's environment for the duration of that job,
+is never written to a file, and is never passed to a step that does not push.
+
+A policy SHALL be registered per repository, permitted to push **new packages as well as
+new versions** — a scope limited to selected existing packages cannot push a new
+identifier, and every identifier in this ecosystem is new.
+
+A policy's scope SHALL name only the identifiers the repository it names publishes. A
+namespace-wide scope such as `Rinzler78.*` SHALL NOT be used: a policy is a grant to
+whatever workflow matches it, so a namespace-wide scope would let a compromise of any one
+repository publish or replace any package of the ecosystem. Where a single glob cannot
+express a repository's identifiers, that SHALL be one policy per identifier rather than
+one wider glob.
 
 The token SHALL be exchanged immediately before the push. It is valid for one hour, and a
 job that builds first and requests the key at its start would lose it between the pack
@@ -242,6 +253,12 @@ nineteen places to rotate and one to forget.
 - **GIVEN** any repository of the ecosystem
 - **WHEN** its secrets are listed
 - **THEN** none of them is a package-registry key
+
+#### Scenario: a compromised repository cannot reach another's packages
+- **GIVEN** a release workflow whose repository has been compromised
+- **WHEN** it requests a key and attempts to push a package another repository owns
+- **THEN** the exchange grants nothing for that identifier, because no policy scopes it
+  to this repository
 
 #### Scenario: a release published from an unregistered repository fails
 - **GIVEN** a repository with no trusted publishing policy
