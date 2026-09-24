@@ -133,6 +133,29 @@ since the team may need to verify the requester's identity.
 A reservation protects the prefix against third parties. It grants nothing to a workflow,
 and it does not replace the per-repository policy.
 
+## After the first release
+
+`master` now carries the release commit that `develop` does not. Bring `develop` level by
+fast-forward, so that its `version.txt` and `CHANGELOG.md` match and both branches point
+at the same commit:
+
+```bash
+git push origin <release-commit>:refs/heads/develop
+```
+
+What the first publication looked like, for comparison:
+
+```
+==> 2 package(s), all at version 0.1.0
+Pushing Rinzler78.Build.0.1.0.nupkg ...      Created   Your package was pushed.
+Pushing Rinzler78.Templates.0.1.0.nupkg ...  Created   Your package was pushed.
+```
+
+`Created` means accepted, not available. nuget.org validates and indexes asynchronously:
+the flat container served both packages about four minutes after the push, the search
+index later still. Do not announce a package as available until
+`https://api.nuget.org/v3-flatcontainer/<id-lowercase>/index.json` lists the version.
+
 ## Traps met on the first repository
 
 | Symptom | Cause | Fix |
@@ -142,9 +165,20 @@ and it does not replace the per-repository policy.
 | First release proposed as `1.0.0` | Release Please's default for a repository with no tag | `initial-version: 0.1.0` — already in the template |
 | A key that pushes new versions but not a new package | Scope limited to existing packages | *Push new packages and package versions* |
 | A feature branch could publish | The policy matches the file name, never the branch | The `release` environment, restricted to `master` |
+| The release pull request shows no checks | GitHub starts no workflow for events caused by `GITHUB_TOKEN`, which is what Release Please opens its pull request with | Nothing unverified is published — the `publish` job re-verifies the tree before pushing — but a ruleset that *requires* checks on `master` would make the release pull request unmergeable; see the open question below |
+
+## Open question: promoting `develop` to `master`
+
+GitHub has no fast-forward merge method for pull requests: *squash* and *rebase* rewrite
+the commits, so a promotion pull request makes `master` diverge from `develop` at every
+release, and the release commit then has to travel back the same way. The first release
+was promoted and back-merged by fast-forward pushes instead, which keeps both branches on
+identical commits but cannot coexist with a rule requiring a pull request on either
+branch. Until that is decided, the ruleset on both branches carries only what every
+model agrees on: no deletion, no force-push, linear history, signed commits.
 
 ## Record of repositories provisioned
 
 | Repository | Date | Packages in the policy | Forge settings | Policy |
 |---|---|---|---|---|
-| `Rinzler78.Toolkit` | 2026-09-24 | `Rinzler78.Build`, `Rinzler78.Templates` | yes | active |
+| `Rinzler78.Toolkit` | 2026-09-24 | `Rinzler78.Build`, `Rinzler78.Templates` | yes | active — `0.1.0` published 2026-09-24 |
