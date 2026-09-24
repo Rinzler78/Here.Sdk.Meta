@@ -69,10 +69,18 @@ public before extraction is complete.
       no workflow can grant itself that right — and the ruleset on both long-lived
       branches. Applied by hand on `Rinzler78.Toolkit` and `Here.Sdk.Meta` on
       2026-09-24; the remaining seventeen repositories get it at creation.
-      It precedes publication: a release cannot open its pull request without it
-- [ ] 1.6 Publish the three packages. Publication is keyless: a trusted publishing
-      policy per repository, scoped to the identifiers that repository publishes and
-      never to the whole namespace, registered on nuget.org before the first release
+      It precedes publication: a release cannot open its pull request without it.
+      State on `Rinzler78.Toolkit`: workflow permissions and the `master`-only `release`
+      environment applied; the ruleset carries deletion, force-push, linear history and
+      signatures. Requiring a pull request and status checks waits on the promotion
+      model — GitHub has no fast-forward merge, and the release pull request runs no
+      checks because GITHUB_TOKEN events start no workflow
+- [ ] 1.6 Publish the three toolchain packages. Publication is keyless: a trusted
+      publishing policy per repository, scoped to the identifiers that repository
+      publishes and never to the whole namespace, registered on nuget.org before the
+      first release. `Rinzler78.Build` and `Rinzler78.Templates` 0.1.0 published on
+      2026-09-24; `Here.Sdk.Build` follows 1.4. The procedure is in
+      `docs/runbooks/nuget-publication.md`
 - [ ] 1.7 Request the `Rinzler78.` prefix reservation. This does not wait on
       phase 1: `Rinzler78.CometBFT.Client` is already published under the same
       owner, so the reservation prerequisite is met today. The search index
