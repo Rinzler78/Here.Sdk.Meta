@@ -40,8 +40,9 @@ public before extraction is complete.
       script with its non-mutating `--check` mode,
       `Directory.Packages.props` and lock files with `--locked-mode` in CI,
       a `README.md` with the required sections and the check that keeps it true,
-      `.github/ISSUE_TEMPLATE/`, the thirteen labels, Release Please, the
-      `lockfile-sync` workflow, the ruleset definition, DocFX, the script facade,
+      `.github/ISSUE_TEMPLATE/`, the thirteen labels, the tag-driven release workflow
+      and its tag check, MinVer, the `lockfile-sync` workflow, the forge provisioning
+      script, DocFX, the script facade,
       and a `net10.0` xUnit v3 test project at `tests/<PackageId>.Tests` — the
       single test framework of the ecosystem, no project targeting a platform
       moniker — wired to `AwesomeAssertions`, `NSubstitute` and
@@ -63,24 +64,23 @@ public before extraction is complete.
       as seeds — the README, the entry points, the solution, the central versions,
       the dictionary and the scaffold, whose content is repository-specific by
       construction
-- [ ] 1.6a Forge settings, applied by the provisioning step and verified by the audit:
-      default workflow permissions read-only, workflows permitted to create pull
-      requests — Release Please cannot open its own release pull request otherwise, and
-      no workflow can grant itself that right — and the ruleset on both long-lived
-      branches. Applied by hand on `Rinzler78.Toolkit` and `Here.Sdk.Meta` on
-      2026-09-24; the remaining seventeen repositories get it at creation.
-      It precedes publication: a release cannot open its pull request without it.
-      State on `Rinzler78.Toolkit`: workflow permissions and the `master`-only `release`
-      environment applied; the ruleset carries deletion, force-push, linear history and
-      signatures. Requiring a pull request and status checks waits on the promotion
-      model — GitHub has no fast-forward merge, and the release pull request runs no
-      checks because GITHUB_TOKEN events start no workflow
+- [ ] 1.6a Forge settings, applied by `scripts/_provision-forge.sh` and verified by the
+      audit: a read-only workflow token that cannot approve pull requests, the `release`
+      environment admitting tags `v*` only, `develop` (pull request, squash, linear,
+      signed, checks bound to GitHub Actions), `master` (pull request, merge commits,
+      signed, same checks), immutable tags `v*` created by administrators only.
+      Applied to `Rinzler78.Toolkit` on 2026-09-26, the hand-made ruleset and the branch
+      the previous, bot-driven release flow left behind removed. The required checks are
+      `verify` and `lint`: no task yet schedules `spec-reviewer` and
+      `package-api-reviewer`, which `release-flow` also requires. `Here.Sdk.Meta` gets it with 1.8, once it carries
+      the CI whose checks the rulesets require; the other seventeen at creation
 - [ ] 1.6 Publish the three toolchain packages. Publication is keyless: a trusted
       publishing policy per repository, scoped to the identifiers that repository
       publishes and never to the whole namespace, registered on nuget.org before the
       first release. `Rinzler78.Build` and `Rinzler78.Templates` 0.1.0 published on
-      2026-09-24; `Here.Sdk.Build` follows 1.4. The procedure is in
-      `docs/runbooks/nuget-publication.md`
+      2026-09-24 through the previous, bot-driven release flow, since replaced: a release
+      is now a signed tag on `master`, and the tag publishes. `Here.Sdk.Build` follows 1.4. The procedure
+      is in `docs/runbooks/nuget-publication.md`
 - [ ] 1.7 Request the `Rinzler78.` prefix reservation. This does not wait on
       phase 1: `Rinzler78.CometBFT.Client` is already published under the same
       owner, so the reservation prerequisite is met today. The search index

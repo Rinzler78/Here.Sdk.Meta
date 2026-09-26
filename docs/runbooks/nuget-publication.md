@@ -2,7 +2,8 @@
 
 The procedure, and the reasons behind each step, for giving one repository of the
 ecosystem the ability to publish its packages. It was first carried out on
-`Rinzler78.Toolkit` on 2026-09-24, and every trap below was met there.
+`Rinzler78.Toolkit` on 2026-09-24 with Release Please, and moved to tag-driven releases
+on 2026-09-26; every trap below was met there.
 
 Publication uses nuget.org trusted publishing over GitHub OIDC: **no long-lived key
 exists** — not in a repository secret, not on a machine. The only key is the one the
@@ -14,64 +15,79 @@ which that could go wrong; none of them is optional.
 
 A repository generated from `Rinzler78.Templates` arrives with:
 
-- `.github/workflows/release.yml` — Release Please on `master`, then a `publish` job that
-  runs in the `release` environment, asks GitHub for an OIDC token **immediately before
-  the push**, and hands the one-hour key to `scripts/publish.sh`;
-- `release-please-config.json` — `release-type: simple`, `initial-version: 0.1.0`;
-- `version.txt`, `.release-please-manifest.json` — seeds, owned by the repository;
-- `scripts/package.sh` — reads `version.txt`, and `VERSION_SUFFIX` for prereleases;
-- `scripts/publish.sh` — refuses any package whose file name does not carry
-  `EXPECTED_VERSION`, the version the release claims.
+- `.github/workflows/release.yml` — triggered by a tag `v*`; checks the tag, verifies the
+  tree, asks GitHub for an OIDC token **immediately before the push**, publishes, and
+  creates the GitHub release with generated notes;
+- `scripts/_release-tag.sh` — refuses a tag outside `vMAJOR.MINOR.PATCH[-(alpha|beta|rc).N]`,
+  a lightweight tag, a tag whose signature GitHub does not verify, and a tag on a commit
+  `master` does not contain;
+- MinVer, in `Directory.Packages.props` — the version comes from the tags alone;
+- `scripts/publish.sh` — refuses any package whose manifest does not declare
+  `EXPECTED_VERSION`, the tag's version; the release workflow runs that check on its
+  own, before it requests the credential;
+- `scripts/_provision-forge.sh` — every forge setting below, idempotent.
 
 Nothing in the tree needs editing. Everything below lives outside it.
 
-## Step 1 — forge settings, by API
+## Step 1 — sign commits in the clone
 
-Run once per repository, right after it is created. `REPO` is `Rinzler78/<name>`.
-
-```bash
-REPO=Rinzler78/<name>
-
-# Workflows may open pull requests — Release Please cannot open its release pull request
-# otherwise, and no workflow can grant itself that right. The default token stays
-# read-only: a job that needs more declares it, per job.
-gh api -X PUT "repos/$REPO/actions/permissions/workflow" \
-  -f default_workflow_permissions=read -F can_approve_pull_request_reviews=true
-
-# The `release` environment, admitting deployments from `master` only.
-echo '{"deployment_branch_policy":{"protected_branches":false,"custom_branch_policies":true}}' |
-  gh api -X PUT "repos/$REPO/environments/release" --input -
-gh api -X POST "repos/$REPO/environments/release/deployment-branch-policies" \
-  -f name=master -f type=branch
-```
-
-Verify:
+The rulesets require signed commits, and GitHub refuses to merge a pull request carrying
+an unsigned one — `mergeStateStatus: BLOCKED`, with `--admin` as the only suggestion,
+which the rulesets do not honour. The key is `~/.ssh/Rinzler78-GitHub.pub`, registered on
+the account as a *signing* key. Per clone, before the first commit:
 
 ```bash
-gh api "repos/$REPO/actions/permissions/workflow"
-# {"default_workflow_permissions":"read","can_approve_pull_request_reviews":true}
-gh api "repos/$REPO/environments/release/deployment-branch-policies" --jq '.branch_policies[]|"\(.type): \(.name)"'
-# branch: master
+git config gpg.format ssh
+git config user.signingkey ~/.ssh/Rinzler78-GitHub.pub
+git config commit.gpgsign true
+git config tag.gpgsign true
 ```
-
-**Why the environment is not optional.** A nuget.org policy matches the repository owner,
-the repository, the workflow's *file name* and the environment — **never the branch**.
-Without an environment, any branch carrying a file named `release.yml` can mint a key: a
-feature branch that rewrites that file to trigger on its own push would publish without
-review. The `push: branches: [master]` trigger cannot prevent it, because it lives in the
-very file the branch rewrites.
 
 ## Step 2 — the `master` branch
 
-The release workflow triggers on `master`. A repository cut from the template has only
-`develop`; create `master` from it once, **before** the rulesets are applied — once they
-are, `master` only moves through the promotion the ruleset allows:
+A repository cut from the template has only `develop`. Create `master` from it once:
 
 ```bash
 git push origin develop:master
 ```
 
-## Step 3 — the nuget.org policy
+This is the one direct push the flow allows, and `release-flow` names it: it creates a
+branch rather than changing one, before any promotion can exist. From then on `master`
+moves only through promotion pull requests from `develop`, merged with a merge commit.
+
+## Step 3 — forge settings
+
+```bash
+bash scripts/_provision-forge.sh Rinzler78/<name>
+```
+
+It applies, and re-applies without harm:
+
+- a read-only default workflow token that cannot create or approve pull requests;
+- the `release` environment, admitting tags `v*` only — any other deployment policy is
+  deleted, not merely outnumbered;
+- `develop`: pull request, squash only, linear history, signed, `verify` and `lint`
+  required and bound to GitHub Actions;
+- `master`: pull request, merge commits only, signed, the same checks, no linear
+  history — a promotion keeps `develop`'s history;
+- tags `v*`: neither updatable nor deletable by anyone, and created by administrators
+  only — two rulesets, because a bypass applies to a whole ruleset.
+
+The required checks are `verify` (build and tests) and `lint` (static quality), the jobs
+of the harness's `ci.yml`. The domain reviewers `release-flow` also requires,
+`spec-reviewer` and `package-api-reviewer`, join them in the script when they exist;
+no task schedules them yet. A check the ruleset requires must exist: a repository without that
+workflow — `Here.Sdk.Meta` before it is generated from the template — would have every
+pull request blocked on checks that never run. Provision it once it carries the CI.
+
+**Why the environment is not optional.** A nuget.org policy matches the repository owner,
+the repository, the workflow's *file name* and the environment — **never the ref**.
+Without an environment, any ref carrying a file named `release.yml` can mint a key, and
+the `push: tags` trigger cannot prevent it, because it lives in the very file a branch
+could rewrite. GitHub also silently *creates* an unprotected environment the first time a
+job names one.
+
+## Step 4 — the nuget.org policy
 
 nuget.org → profile menu → **Trusted Publishing** → *Create*. One policy per repository.
 
@@ -109,17 +125,23 @@ same name does not make the policy usable again. A policy on a **private** repos
 starts as pending for seven days and becomes inactive if nothing is published in that
 window; a public repository's policy is active immediately.
 
-## Step 4 — the first release
+## Step 5 — a release
 
-1. Push to `master`. The release workflow runs and Release Please opens
-   `chore(master): release 0.1.0`, changing exactly `version.txt`,
-   `.release-please-manifest.json` and `CHANGELOG.md`.
-2. Merge that pull request. Release Please tags and creates the GitHub release, and the
-   `publish` job runs in the `release` environment.
-3. The job verifies the tree — locked restore, build, test, every repository check, pack
-   — then exchanges its OIDC token and pushes. `publish.sh` refuses any artefact that
-   does not carry the release's version: a version pushed to nuget.org can never be
-   replaced.
+1. Promote: a pull request from `develop` to `master`, merged with a merge commit. Its
+   checks are the costly ones; nothing expensive is discovered after this point.
+2. When certain, tag the merge commit and push the tag:
+
+   ```bash
+   git fetch origin && git tag --sign --annotate v0.2.0 --message v0.2.0 origin/master
+   git push origin v0.2.0
+   ```
+
+   The push publishes, directly. There is no draft and no second gesture: the tag check,
+   the immutable tags and the promotion pull request are what bound an irreversible push.
+3. The workflow checks the tag, verifies the tree — locked restore, build, test, every
+   repository check, pack — then exchanges its OIDC token and pushes. `publish.sh`
+   refuses any artefact that does not carry the tag's version: a version pushed to
+   nuget.org can never be replaced. A mistaken tag is corrected with a new number.
 
 ## The ID prefix reservation
 
@@ -133,17 +155,9 @@ since the team may need to verify the requester's identity.
 A reservation protects the prefix against third parties. It grants nothing to a workflow,
 and it does not replace the per-repository policy.
 
-## After the first release
+## After a release
 
-`master` now carries the release commit that `develop` does not. Bring `develop` level by
-fast-forward, so that its `version.txt` and `CHANGELOG.md` match and both branches point
-at the same commit:
-
-```bash
-git push origin <release-commit>:refs/heads/develop
-```
-
-What the first publication looked like, for comparison:
+What a publication looks like, for comparison:
 
 ```
 ==> 2 package(s), all at version 0.1.0
@@ -160,25 +174,18 @@ index later still. Do not announce a package as available until
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| `release-please--branches--develop` appears after a push to `master` | Release Please targets the repository's **default** branch, not the branch that triggered the run | `target-branch: master` in the action — already in the template |
-| `GitHub Actions is not permitted to create or approve pull requests` | A forge setting, not code | Step 1 |
-| First release proposed as `1.0.0` | Release Please's default for a repository with no tag | `initial-version: 0.1.0` — already in the template |
+| A tag created by the workflow publishes nothing | GitHub starts no workflow for events raised with `GITHUB_TOKEN`, except `workflow_dispatch` and `repository_dispatch` | Tags are pushed by a repository administrator, the only role allowed to create them; this is why Release Please was removed |
+| A pull request `BLOCKED` although every check is green | The ruleset requires signed commits and the branch carries unsigned ones | Step 1, then `git rebase --force-rebase --gpg-sign origin/develop` and `push --force-with-lease` on the feature branch |
+| A rebase merge is refused on a branch requiring signatures | GitHub cannot sign the commits it rewrites | `develop` squashes, `master` merges; rebase is allowed on neither |
+| A squashed promotion replays every earlier commit at the next one | Squash leaves the merge base where it was | Promotions are merge commits; `master` carries no linear-history rule |
 | A key that pushes new versions but not a new package | Scope limited to existing packages | *Push new packages and package versions* |
-| A feature branch could publish | The policy matches the file name, never the branch | The `release` environment, restricted to `master` |
-| The release pull request shows no checks | GitHub starts no workflow for events caused by `GITHUB_TOKEN`, which is what Release Please opens its pull request with | Nothing unverified is published — the `publish` job re-verifies the tree before pushing — but a ruleset that *requires* checks on `master` would make the release pull request unmergeable; see the open question below |
-
-## Open question: promoting `develop` to `master`
-
-GitHub has no fast-forward merge method for pull requests: *squash* and *rebase* rewrite
-the commits, so a promotion pull request makes `master` diverge from `develop` at every
-release, and the release commit then has to travel back the same way. The first release
-was promoted and back-merged by fast-forward pushes instead, which keeps both branches on
-identical commits but cannot coexist with a rule requiring a pull request on either
-branch. Until that is decided, the ruleset on both branches carries only what every
-model agrees on: no deletion, no force-push, linear history, signed commits.
+| A feature branch could publish | The policy matches the file name, never the ref | The `release` environment, restricted to tags `v*` |
+| The `release` environment still admits `master` after re-provisioning | Adding the tag policy left the old branch policy in place | `_provision-forge.sh` deletes every policy other than tags `v*` |
+| Administrators could move a release tag | A bypass applies to every rule of its ruleset | Immutability and creation are two rulesets |
+| A clone reports itself bare after a commit | A `git init` run from a hook inside a worktree inherits `GIT_DIR` and re-initialises the real repository with `core.bare=true` | Scripts and tests unset every inherited `GIT_*` variable; repair with `git config core.bare false` |
 
 ## Record of repositories provisioned
 
 | Repository | Date | Packages in the policy | Forge settings | Policy |
 |---|---|---|---|---|
-| `Rinzler78.Toolkit` | 2026-09-24 | `Rinzler78.Build`, `Rinzler78.Templates` | yes | active — `0.1.0` published 2026-09-24 |
+| `Rinzler78.Toolkit` | 2026-09-24 | `Rinzler78.Build`, `Rinzler78.Templates` | `_provision-forge.sh`, 2026-09-26 | active — `0.1.0` published 2026-09-24 |

@@ -9,7 +9,7 @@
 | Push on `feature/*` | Debug and Release build without costly AOT, unit tests, lint, coverage, trim analysis, `openspec validate --strict` |
 | Pull request to `develop` | the above, plus integration tests, domain reviewers, `pack` without publication |
 | Pull request to `master` | the above, plus full AOT, UI and end-to-end tests, measured sizes posted on the pull request |
-| Release published | packages and applications published, all optimisations enabled |
+| Tag `v*` pushed on `master` | the release workflow: the tag check, the tree verified again, packages and applications published with all optimisations enabled, then the GitHub release created |
 | Nightly, from `Meta` | the integration job — building the graph from sources with full AOT — and the ecosystem audit |
 
 Nothing costly SHALL be discovered at release time: the pull request to `master`
@@ -22,9 +22,14 @@ has already exercised it.
 
 ### Requirement: One branch, one worktree, never reused
 
-The flow is Git Flow with two long-lived branches, `master` and `develop`. Work
-SHALL happen on a `feature/<kebab-slug>` branch cut from `develop`, in a dedicated
-worktree at `<repo>/.worktrees/<kebab-slug>/`.
+Every repository SHALL carry two long-lived branches. `develop` is where work lands.
+`master` only receives promotions from `develop`, and pre-releases and releases are
+cut from it. Work SHALL happen on a `feature/<kebab-slug>` branch cut from `develop`,
+in a dedicated worktree at `<repo>/.worktrees/<kebab-slug>/`. Every change to either
+long-lived branch SHALL go through a pull request, promotions and submodule bumps
+included. Creating `master` from `develop`, once, when a repository is provisioned is
+the single exception: it creates a branch rather than changing one, before any
+promotion can exist.
 
 A branch SHALL NOT be reused once its pull request is merged, and a worktree SHALL
 be removed when its branch is. Reuse is how an agent inherits stale state and
@@ -45,17 +50,34 @@ agent — `src/` **and** `tests/` — so that two agents never contend for the s
 
 ### Requirement: Blocking checks are automated; human approvals are zero
 
-Both long-lived branches SHALL be protected by GitHub Rulesets with linear history,
-signed commits, blocked force-push and deletion, administrators included.
+Both long-lived branches SHALL be protected by GitHub Rulesets requiring a pull
+request and the status checks, with signed commits and blocked force-push and
+deletion, administrators included — without bypass.
 
-Required status checks SHALL be the build, static quality, and three automated
-domain reviewers, each with a defined assertion:
+- `develop` SHALL accept squashed pull requests only, with a linear history.
+- `master` SHALL accept merge commits only, and SHALL NOT require a linear history. A
+  promotion keeps `develop`'s history, so the base of the next promotion advances and
+  its pull request shows only what is new. A squashed promotion would leave the base
+  where it was and replay every earlier commit; a rebased one cannot be signed, since
+  GitHub cannot sign commits it rewrites.
+- Tags `v*` SHALL be neither updatable nor deletable, by anyone, and SHALL be created
+  by repository administrators only. The two are separate rulesets, because a bypass
+  applies to a whole ruleset: the administrators' right to create would otherwise be a
+  right to move.
+
+Required status checks SHALL be bound to the GitHub Actions integration, since a check
+required by name alone is satisfied by any integration posting that name. They SHALL
+be the build, static quality, and two automated domain reviewers, each with a defined
+assertion:
 
 | Reviewer | Asserts |
 |---|---|
 | `spec-reviewer` | The change implements the OpenSpec delta it claims, and every requirement touched has at least one scenario exercised by a test. |
 | `package-api-reviewer` | The `PublicAPI.Unshipped.txt` diff matches the version intent — no removed or changed public member without `breaking-change` and a major bump. |
-| `manual-tag-guard` | No tag exists that was not created by merging a release pull request. |
+
+The domain reviewers join the required checks when they exist. Until then the required
+checks are the build and static quality alone: the `verify` and `lint` jobs of the
+harness.
 
 Required human approvals SHALL be **zero**, the author being the sole maintainer;
 the gate is the machine, not a signature.
@@ -65,18 +87,24 @@ the gate is the machine, not a signature.
 - **WHEN** a domain reviewer check fails
 - **THEN** merging is blocked by the ruleset
 
-### Requirement: Versioning is SemVer 2.0.0, computed from commits
+### Requirement: Versioning is SemVer 2.0.0, carried by the tag
 
-Every package SHALL be versioned according to Semantic Versioning 2.0.0, and the
-version SHALL be **computed** from Conventional Commits by Release Please — never
-edited by hand. Release Please SHALL be the single source of version truth; no
-second versioning mechanism SHALL be added.
+Every package SHALL be versioned according to Semantic Versioning 2.0.0. The version
+SHALL be the release tag's, read by MinVer — never written in a file, a project or a
+workflow. The tag SHALL be the single source of version truth; no second versioning
+mechanism SHALL be added.
+
+Pre-release labels SHALL be `alpha.N`, `beta.N` and `rc.N`, numbered after a dot: the
+three labels the NuGet documentation defines, sorted alphabetically in the order of
+their stability, with `rc.10` sorting after `rc.2`.
 
 A removed or changed public member SHALL require the `!` commit prefix, the
 `breaking-change` label and a major bump. The authority is the surface diff defined
 in `sdk-updates`, not the commit prefix: a mislabelled commit fails its release
-check rather than publishing a breaking change as a minor. Prerelease builds from `develop` SHALL be
-versioned `X.Y.Z-develop.<run>` from the last tag.
+check rather than publishing a breaking change as a minor. A build of an untagged
+commit SHALL carry a prerelease version computed from the last tag and the number of
+commits since it, its height — `1.2.1-alpha.0.3` three commits after `v1.2.0`,
+`1.2.0-rc.1.3` three commits after `v1.2.0-rc.1` — and is never published.
 
 #### Scenario: a breaking change cannot ship as a patch
 - **GIVEN** a pull request removing a public member
@@ -113,29 +141,60 @@ an ADR rather than by adding the file silently.
 - **WHEN** it finds no `CODEOWNERS`
 - **THEN** it passes, because the ADR records the absence as a decision
 
-### Requirement: A release is a reviewed pull request, never a gesture
+### Requirement: A release is a signed tag on master, and the tag publishes
 
-Release Please SHALL maintain a release pull request per repository. Merging it
-creates the tag and the GitHub Release. Publication SHALL trigger on
-`release.published` — deliberate and revocable — never on a tag push, which is
-irreversible.
+A repository administrator SHALL cut a pre-release or a release by pushing a signed,
+annotated tag
+`vMAJOR.MINOR.PATCH`, optionally `-alpha.N`, `-beta.N` or `-rc.N`, on a commit of
+`master`. The push SHALL publish, directly: no bot creates the tag, no release pull
+request precedes it, and no draft awaits a second gesture.
 
-`manual-tag-guard` SHALL fail CI on any tag not created that way.
+The irreversibility of a push to nuget.org is accepted and bounded instead:
 
-The release pull request SHALL carry the generated changelog, the computed version,
-the public API diff, and the sizes measured after AOT.
+- the costly checks run on the promotion pull request into `master`, before any tag
+  can name its commit;
+- before anything is built, the release workflow SHALL refuse a tag outside that form,
+  a lightweight tag, a tag whose signature GitHub does not verify, and a tag on a
+  commit `master` does not contain;
+- tags cannot be moved or deleted, and only administrators create them;
+- every package SHALL carry exactly the tag's version, read from the version its
+  manifest declares rather than from its file name, checked before the credential is
+  requested.
 
-#### Scenario: a hand-made tag is rejected
-- **GIVEN** a tag pushed directly to the repository
-- **WHEN** CI runs
-- **THEN** `manual-tag-guard` fails and no package is published
+These bounds guard against mistakes, not against a compromised administrator, and
+that residual risk is accepted. A tag push runs the workflow file of the tagged commit,
+so the tag check lives in code the tagged commit could have altered; the `release`
+environment matches the tag's name and the nuget.org policy the workflow's file name,
+and neither establishes that the commit came from `master`. What stands in the way is
+that only administrators create tags — and an administrator can already change the
+environment and the rulesets. Closing it would take a second human approving each
+deployment, which the zero-approval rule excludes, or a deployment protection app,
+whose private key is the long-lived credential this flow forbids.
+
+The release workflow SHALL declare the tag push as its only trigger. A tag pushed with a
+workflow's own `GITHUB_TOKEN` raises a push event GitHub starts no workflow for, so a
+bot-created tag publishes nothing; the two events `GITHUB_TOKEN` can still raise,
+`workflow_dispatch` and `repository_dispatch`, are not triggers of the release
+workflow, and SHALL NOT become ones. Release notes SHALL be the GitHub
+release's, generated from the pull requests between two tags.
+
+#### Scenario: a tag on unpromoted work publishes nothing
+- **GIVEN** a signed tag on a commit of `develop` that `master` does not contain
+- **WHEN** the release workflow runs
+- **THEN** it fails before building, naming the tag, and nothing is published
+
+#### Scenario: a lightweight tag publishes nothing
+- **GIVEN** a tag created without `--annotate`
+- **WHEN** the release workflow runs
+- **THEN** it fails before building, because a lightweight tag carries no signature
 
 ### Requirement: Publication cascades in topological waves
 
 nuget.org offers no webhook: its catalogue is an append-only, read-only feed
 consumed with a cursor. Between repositories, `repository_dispatch` SHALL be used.
 
-On `release.published`, the publishing repository SHALL notify `Meta`. `Meta` SHALL
+When its release workflow has published, the publishing repository SHALL notify
+`Meta`. `Meta` SHALL
 poll the flat-container index until the version is restorable, then open bump pull
 requests in the next topological wave — editing `Directory.Packages.props`, running
 `dotnet restore --force-evaluate`, committing the regenerated lock file — and wait
@@ -267,18 +326,18 @@ nineteen places to rotate and one to forget.
 
 ### Requirement: The version is written once, read everywhere
 
-Release Please SHALL write the computed version to a single file in the repository, and
-the packaging verb SHALL read it from there. No project file, command line or workflow
-SHALL carry a version of its own: a second source of version truth is the one that goes
-stale, and it goes stale silently.
+The version SHALL exist in one place, the tag, and MinVer SHALL compute it from the tags
+in an IDE, in the packaging verb and in the release workflow alike. No file, project,
+command line or workflow SHALL carry a version of its own: a second source of version
+truth is the one that goes stale, and it goes stale silently.
 
 A package built outside a release SHALL carry a prerelease suffix, so that a continuous
 integration artefact cannot be mistaken for a released version.
 
 #### Scenario: a continuous integration build is not a release
-- **GIVEN** a build of `develop`
+- **GIVEN** a build of `develop` three commits after `v1.2.0`
 - **WHEN** it packs
-- **THEN** the version carries a `develop.<run>` prerelease suffix, and nothing is pushed
+- **THEN** the version is `1.2.1-alpha.0.3`, and nothing is pushed
 
 ### Requirement: A repository's forge settings are part of its bootstrap
 
@@ -292,32 +351,40 @@ At minimum:
 
 - **Default workflow permissions SHALL remain read-only.** A job that needs more declares
   it, per job, in the workflow.
-- **Workflows SHALL be permitted to create pull requests.** Release Please prepares a
-  release as a pull request; without this the release run fails with *GitHub Actions is
-  not permitted to create or approve pull requests*, which no workflow can grant itself.
-  GitHub exposes creation and approval as **one** switch — the repository's
-  `can_approve_pull_request_reviews` workflow permission — so the invariant is that field
-  set to `true`, and the audit SHALL check that exact field. Approval is a side effect of
-  the switch, not a need: no ruleset requires a human or bot approval.
-- **Both long-lived branches SHALL carry their ruleset** — linear history, signed commits,
-  no force-push, no deletion, administrators included.
+- **Workflows SHALL NOT create or approve pull requests.** No workflow of the harness
+  opens one since releases became tags, and GitHub exposes creation and approval as
+  **one** switch — the repository's `can_approve_pull_request_reviews` workflow
+  permission — so the invariant is that field set to `false`, and the audit SHALL check
+  that exact field. The switch governs the repository's `GITHUB_TOKEN` only. The
+  cascade opens its bump pull requests in other repositories, which no repository's
+  `GITHUB_TOKEN` can reach whatever this switch says; the identity the cascade writes
+  with is decided with the cascade itself, and is not yet specified.
+- **The `release` environment SHALL admit tags `v*` only.** A trusted publishing policy
+  matches the workflow's file name and the environment, never the ref, and GitHub
+  silently creates an unprotected environment the first time a job names one. Any other
+  deployment policy SHALL be removed, not merely outnumbered.
+- **The rulesets of `Blocking checks are automated` SHALL be applied** — both
+  long-lived branches, the immutable release tags, and their creation by administrators.
+
+The provisioning step is `scripts/_provision-forge.sh`, delivered by the template and
+idempotent.
 
 The audit SHALL report a repository whose forge settings diverge from these, in the same
 way it reports harness drift: the settings are part of the harness, they simply do not
 live in the tree.
 
-#### Scenario: a freshly created repository can run its own release flow
+#### Scenario: a freshly created repository can only publish from a release tag
 - **GIVEN** a repository created by the provisioning step
-- **WHEN** a push to `master` runs the release workflow
-- **THEN** Release Please opens its pull request, and the default token stays read-only
+- **WHEN** a job naming the `release` environment runs from `develop`
+- **THEN** the deployment is refused, and the default token stays read-only
 
 #### Scenario: a hand-edited setting is reported
 - **GIVEN** a repository whose workflow permissions were widened by hand
 - **WHEN** the ecosystem audit runs
 - **THEN** it reports that repository and the setting that diverges
 
-#### Scenario: a repository whose workflows cannot open pull requests is reported
+#### Scenario: a repository whose workflows may approve pull requests is reported
 - **GIVEN** a repository whose `can_approve_pull_request_reviews` workflow permission is
-  `false`
+  `true`
 - **WHEN** the ecosystem audit runs
-- **THEN** it reports the repository, naming that field, before a release run fails on it
+- **THEN** it reports the repository, naming that field
