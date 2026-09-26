@@ -140,8 +140,9 @@ Every feature and every bug fix SHALL be developed test-first. The failing test 
 the implementation that makes it pass SHALL be distinguishable in the **pull
 request's commit list**, which is where the order survives.
 
-`release-flow` requires linear history on the long-lived branches, so merges are
-squashed and intermediate commits do not reach `develop` or `master`. Verification
+`release-flow` requires a linear history on `develop`, so feature merges are squashed
+and intermediate commits do not reach `develop`, nor `master`, which receives only
+promotions of `develop`. Verification
 SHALL therefore run on the pull request's own commits, before the squash, and its
 verdict SHALL be recorded as a status check — the check outliving the commits it
 inspected.

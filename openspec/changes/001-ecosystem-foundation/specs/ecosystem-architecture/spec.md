@@ -96,7 +96,11 @@ by another repository. Cross-repository dependencies SHALL be expressed as
 
 During extraction of a contract from existing implementations, prerelease versions
 (`1.0.0-alpha.N`) SHALL be used to close the loop. Nothing SHALL be published in
-stable form, nor any repository made public, before extraction is complete.
+stable form, nor any repository taking part in the extraction made public, before
+extraction is complete. The toolchain repositories — `Rinzler78.Toolkit` and
+`Here.Sdk.Build` — take no part in it and are public from their creation: a package
+pointing at a private repository sends every consumer to a 404, and its SourceLink to
+sources nobody can read.
 
 #### Scenario: no project reference crosses a repository boundary
 - **GIVEN** any repository in the ecosystem

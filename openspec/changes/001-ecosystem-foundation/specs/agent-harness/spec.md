@@ -63,9 +63,9 @@ leaving Codex with no entry point at all.
 
 - **`PreToolUse`** — refusing edits when `master` or `develop` is checked out, and
   running the credential detector before any write. The pattern SHALL name the
-  branches this flow actually produces: there is no `release/*` branch, Release
-  Please working on its own `release-please--*` branches, and a deny rule naming a
-  branch the flow never creates is precisely the dead rule this requirement forbids.
+  branches this flow actually produces: there is no `release/*` branch and no bot
+  branch — a release is a tag — and a deny rule naming a branch the flow never
+  creates is precisely the dead rule this requirement forbids.
 - **`PostToolUse`** — running the formatter on written files.
 - **`Stop`** — printing the pre-pull-request gate: tests run, coverage met,
   specification validated.

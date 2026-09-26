@@ -168,8 +168,8 @@ exists to remove. The natives are built first, standing alone; the contract is
 extracted from all three capability sets.
 
 The only obstacle — repositories reference each other solely through published
-packages — is lifted by prerelease versions. Release Please already versions
-`develop` builds that way.
+packages — is lifted by prerelease versions: an `alpha.N` tag on `master` publishes
+one, and MinVer versions every untagged build as a prerelease already.
 
 A spike survives, reduced to JavaScript alone. Extracting from the two most capable
 implementations reliably produces a contract the third cannot satisfy; the JS
