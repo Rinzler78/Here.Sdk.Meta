@@ -160,6 +160,16 @@ The irreversibility of a push to nuget.org is accepted and bounded instead:
   manifest declares rather than from its file name, checked before the credential is
   requested.
 
+These bounds guard against mistakes, not against a compromised administrator, and
+that residual risk is accepted. A tag push runs the workflow file of the tagged commit,
+so the tag check lives in code the tagged commit could have altered; the `release`
+environment matches the tag's name and the nuget.org policy the workflow's file name,
+and neither establishes that the commit came from `master`. What stands in the way is
+that only administrators create tags — and an administrator can already change the
+environment and the rulesets. Closing it would take a second human approving each
+deployment, which the zero-approval rule excludes, or a deployment protection app,
+whose private key is the long-lived credential this flow forbids.
+
 The release workflow SHALL declare the tag push as its only trigger. A tag pushed with a
 workflow's own `GITHUB_TOKEN` raises a push event GitHub starts no workflow for, so a
 bot-created tag publishes nothing; the two events `GITHUB_TOKEN` can still raise,
