@@ -68,14 +68,16 @@ deletion, administrators included — without bypass.
 Required status checks SHALL be bound to the GitHub Actions integration, since a check
 required by name alone is satisfied by any integration posting that name. They SHALL
 be the build, static quality, and two automated domain reviewers, each with a defined
-assertion. The domain reviewers join the required checks when they exist; until then
-the required checks are the build and static quality, the `verify` and `lint` jobs of
-the harness:
+assertion:
 
 | Reviewer | Asserts |
 |---|---|
 | `spec-reviewer` | The change implements the OpenSpec delta it claims, and every requirement touched has at least one scenario exercised by a test. |
 | `package-api-reviewer` | The `PublicAPI.Unshipped.txt` diff matches the version intent — no removed or changed public member without `breaking-change` and a major bump. |
+
+The domain reviewers join the required checks when they exist. Until then the required
+checks are the build and static quality alone: the `verify` and `lint` jobs of the
+harness.
 
 Required human approvals SHALL be **zero**, the author being the sole maintainer;
 the gate is the machine, not a signature.
