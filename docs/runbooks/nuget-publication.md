@@ -50,8 +50,9 @@ A repository cut from the template has only `develop`. Create `master` from it o
 git push origin develop:master
 ```
 
-From then on `master` moves only through promotion pull requests from `develop`, merged
-with a merge commit.
+This is the one direct push the flow allows, and `release-flow` names it: it creates a
+branch rather than changing one, before any promotion can exist. From then on `master`
+moves only through promotion pull requests from `develop`, merged with a merge commit.
 
 ## Step 3 — forge settings
 
@@ -71,7 +72,10 @@ It applies, and re-applies without harm:
 - tags `v*`: neither updatable nor deletable by anyone, and created by administrators
   only — two rulesets, because a bypass applies to a whole ruleset.
 
-The required checks are the jobs of the harness's `ci.yml`: a repository without that
+The required checks are `verify` (build and tests) and `lint` (static quality), the jobs
+of the harness's `ci.yml`. The domain reviewers `release-flow` also requires,
+`spec-reviewer` and `package-api-reviewer`, join them in the script when they exist;
+no task schedules them yet. A check the ruleset requires must exist: a repository without that
 workflow — `Here.Sdk.Meta` before it is generated from the template — would have every
 pull request blocked on checks that never run. Provision it once it carries the CI.
 

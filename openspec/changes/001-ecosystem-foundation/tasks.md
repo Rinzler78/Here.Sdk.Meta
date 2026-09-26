@@ -69,15 +69,17 @@ public before extraction is complete.
       environment admitting tags `v*` only, `develop` (pull request, squash, linear,
       signed, checks bound to GitHub Actions), `master` (pull request, merge commits,
       signed, same checks), immutable tags `v*` created by administrators only.
-      Applied to `Rinzler78.Toolkit` on 2026-09-26, the hand-made ruleset and the
-      Release Please branch removed. `Here.Sdk.Meta` gets it with 1.8, once it carries
+      Applied to `Rinzler78.Toolkit` on 2026-09-26, the hand-made ruleset and the branch
+      the previous, bot-driven release flow left behind removed. The required checks are
+      `verify` and `lint`: no task yet schedules `spec-reviewer` and
+      `package-api-reviewer`, which `release-flow` also requires. `Here.Sdk.Meta` gets it with 1.8, once it carries
       the CI whose checks the rulesets require; the other seventeen at creation
 - [ ] 1.6 Publish the three toolchain packages. Publication is keyless: a trusted
       publishing policy per repository, scoped to the identifiers that repository
       publishes and never to the whole namespace, registered on nuget.org before the
       first release. `Rinzler78.Build` and `Rinzler78.Templates` 0.1.0 published on
-      2026-09-24 through Release Please, since replaced: a release is now a signed tag
-      on `master`, and the tag publishes. `Here.Sdk.Build` follows 1.4. The procedure
+      2026-09-24 through the previous, bot-driven release flow, since replaced: a release
+      is now a signed tag on `master`, and the tag publishes. `Here.Sdk.Build` follows 1.4. The procedure
       is in `docs/runbooks/nuget-publication.md`
 - [ ] 1.7 Request the `Rinzler78.` prefix reservation. This does not wait on
       phase 1: `Rinzler78.CometBFT.Client` is already published under the same

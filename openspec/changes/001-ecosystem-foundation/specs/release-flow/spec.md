@@ -9,7 +9,7 @@
 | Push on `feature/*` | Debug and Release build without costly AOT, unit tests, lint, coverage, trim analysis, `openspec validate --strict` |
 | Pull request to `develop` | the above, plus integration tests, domain reviewers, `pack` without publication |
 | Pull request to `master` | the above, plus full AOT, UI and end-to-end tests, measured sizes posted on the pull request |
-| Release published | packages and applications published, all optimisations enabled |
+| Tag `v*` pushed on `master` | the release workflow: the tag check, the tree verified again, packages and applications published with all optimisations enabled, then the GitHub release created |
 | Nightly, from `Meta` | the integration job — building the graph from sources with full AOT — and the ecosystem audit |
 
 Nothing costly SHALL be discovered at release time: the pull request to `master`
@@ -27,7 +27,9 @@ Every repository SHALL carry two long-lived branches. `develop` is where work la
 cut from it. Work SHALL happen on a `feature/<kebab-slug>` branch cut from `develop`,
 in a dedicated worktree at `<repo>/.worktrees/<kebab-slug>/`. Every change to either
 long-lived branch SHALL go through a pull request, promotions and submodule bumps
-included.
+included. Creating `master` from `develop`, once, when a repository is provisioned is
+the single exception: it creates a branch rather than changing one, before any
+promotion can exist.
 
 A branch SHALL NOT be reused once its pull request is merged, and a worktree SHALL
 be removed when its branch is. Reuse is how an agent inherits stale state and
@@ -66,7 +68,9 @@ deletion, administrators included — without bypass.
 Required status checks SHALL be bound to the GitHub Actions integration, since a check
 required by name alone is satisfied by any integration posting that name. They SHALL
 be the build, static quality, and two automated domain reviewers, each with a defined
-assertion:
+assertion. The domain reviewers join the required checks when they exist; until then
+the required checks are the build and static quality, the `verify` and `lint` jobs of
+the harness:
 
 | Reviewer | Asserts |
 |---|---|
@@ -333,7 +337,10 @@ At minimum:
   opens one since releases became tags, and GitHub exposes creation and approval as
   **one** switch — the repository's `can_approve_pull_request_reviews` workflow
   permission — so the invariant is that field set to `false`, and the audit SHALL check
-  that exact field.
+  that exact field. The switch governs the repository's `GITHUB_TOKEN` only. The
+  cascade opens its bump pull requests in other repositories, which no repository's
+  `GITHUB_TOKEN` can reach whatever this switch says; the identity the cascade writes
+  with is decided with the cascade itself, and is not yet specified.
 - **The `release` environment SHALL admit tags `v*` only.** A trusted publishing policy
   matches the workflow's file name and the environment, never the ref, and GitHub
   silently creates an unprotected environment the first time a job names one. Any other
