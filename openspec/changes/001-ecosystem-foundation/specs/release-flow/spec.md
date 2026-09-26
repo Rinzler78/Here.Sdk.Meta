@@ -102,8 +102,9 @@ A removed or changed public member SHALL require the `!` commit prefix, the
 `breaking-change` label and a major bump. The authority is the surface diff defined
 in `sdk-updates`, not the commit prefix: a mislabelled commit fails its release
 check rather than publishing a breaking change as a minor. A build of an untagged
-commit SHALL be versioned as the next patch, `X.Y.Z-alpha.0.<height>` from the last
-tag, and is never published.
+commit SHALL carry a prerelease version computed from the last tag and the number of
+commits since it, its height — `1.2.1-alpha.0.3` three commits after `v1.2.0`,
+`1.2.0-rc.1.3` three commits after `v1.2.0-rc.1` — and is never published.
 
 #### Scenario: a breaking change cannot ship as a patch
 - **GIVEN** a pull request removing a public member
@@ -155,11 +156,15 @@ The irreversibility of a push to nuget.org is accepted and bounded instead:
   a lightweight tag, a tag whose signature GitHub does not verify, and a tag on a
   commit `master` does not contain;
 - tags cannot be moved or deleted, and only administrators create them;
-- every package SHALL carry exactly the tag's version, checked before the push.
+- every package SHALL carry exactly the tag's version, read from the version its
+  manifest declares rather than from its file name, checked before the credential is
+  requested.
 
-A tag created by a workflow's own token starts no workflow — GitHub starts none for
-events raised with `GITHUB_TOKEN` — so a bot-created tag could only publish through a
-long-lived token, which `release-flow` forbids. Release notes SHALL be the GitHub
+The release workflow SHALL declare the tag push as its only trigger. A tag pushed with a
+workflow's own `GITHUB_TOKEN` raises a push event GitHub starts no workflow for, so a
+bot-created tag publishes nothing; the two events `GITHUB_TOKEN` can still raise,
+`workflow_dispatch` and `repository_dispatch`, are not triggers of the release
+workflow, and SHALL NOT become ones. Release notes SHALL be the GitHub
 release's, generated from the pull requests between two tags.
 
 #### Scenario: a tag on unpromoted work publishes nothing

@@ -22,8 +22,9 @@ A repository generated from `Rinzler78.Templates` arrives with:
   a lightweight tag, a tag whose signature GitHub does not verify, and a tag on a commit
   `master` does not contain;
 - MinVer, in `Directory.Packages.props` — the version comes from the tags alone;
-- `scripts/publish.sh` — refuses any package whose file name does not carry
-  `EXPECTED_VERSION`, the tag's version;
+- `scripts/publish.sh` — refuses any package whose manifest does not declare
+  `EXPECTED_VERSION`, the tag's version; the release workflow runs that check on its
+  own, before it requests the credential;
 - `scripts/_provision-forge.sh` — every forge setting below, idempotent.
 
 Nothing in the tree needs editing. Everything below lives outside it.
