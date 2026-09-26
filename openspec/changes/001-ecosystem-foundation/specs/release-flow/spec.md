@@ -143,7 +143,8 @@ an ADR rather than by adding the file silently.
 
 ### Requirement: A release is a signed tag on master, and the tag publishes
 
-A maintainer SHALL cut a pre-release or a release by pushing a signed, annotated tag
+A repository administrator SHALL cut a pre-release or a release by pushing a signed,
+annotated tag
 `vMAJOR.MINOR.PATCH`, optionally `-alpha.N`, `-beta.N` or `-rc.N`, on a commit of
 `master`. The push SHALL publish, directly: no bot creates the tag, no release pull
 request precedes it, and no draft awaits a second gesture.

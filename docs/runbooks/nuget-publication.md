@@ -174,7 +174,7 @@ index later still. Do not announce a package as available until
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| A tag created by the workflow publishes nothing | GitHub starts no workflow for events raised with `GITHUB_TOKEN`, except `workflow_dispatch` and `repository_dispatch` | Tags are pushed by a maintainer; this is why Release Please was removed |
+| A tag created by the workflow publishes nothing | GitHub starts no workflow for events raised with `GITHUB_TOKEN`, except `workflow_dispatch` and `repository_dispatch` | Tags are pushed by a repository administrator, the only role allowed to create them; this is why Release Please was removed |
 | A pull request `BLOCKED` although every check is green | The ruleset requires signed commits and the branch carries unsigned ones | Step 1, then `git rebase --force-rebase --gpg-sign origin/develop` and `push --force-with-lease` on the feature branch |
 | A rebase merge is refused on a branch requiring signatures | GitHub cannot sign the commits it rewrites | `develop` squashes, `master` merges; rebase is allowed on neither |
 | A squashed promotion replays every earlier commit at the next one | Squash leaves the merge base where it was | Promotions are merge commits; `master` carries no linear-history rule |
