@@ -55,6 +55,11 @@ request and the status checks, with signed commits and blocked force-push and
 deletion, administrators included — without bypass.
 
 - `develop` SHALL accept squashed pull requests only, with a linear history.
+- `master` SHALL accept pull requests from this repository's `develop` only. No ruleset
+  can restrict a source branch, so a required check, `promotion-source`, SHALL enforce
+  it — run through `pull_request_target`, from the base branch's own copy of the
+  workflow and without checking out the pull request, so that no pull request can
+  rewrite the gate it is judged by.
 - `master` SHALL accept merge commits only, and SHALL NOT require a linear history. A
   promotion keeps `develop`'s history, so the base of the next promotion advances and
   its pull request shows only what is new. A squashed promotion would leave the base

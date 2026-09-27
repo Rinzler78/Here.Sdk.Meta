@@ -68,8 +68,12 @@ It applies, and re-applies without harm:
   deleted, not merely outnumbered;
 - `develop`: pull request, squash only, linear history, signed, `verify` and `lint`
   required and bound to GitHub Actions;
-- `master`: pull request, merge commits only, signed, the same checks, no linear
-  history — a promotion keeps `develop`'s history;
+- `master`: pull request, merge commits only, signed, the same checks plus
+  `promotion-source` — `promotion.yml`, run from `master`'s own copy through
+  `pull_request_target`, refusing any source but this repository's `develop` — and no
+  linear history, since a promotion keeps `develop`'s history. `master` must carry
+  `promotion.yml` before the check is required, or no pull request into it can merge:
+  a generated repository has it from creation;
 - Copilot reviewing every push to a pull request into either branch;
 - tags `v*`: neither updatable nor deletable by anyone, and created by administrators
   only — two rulesets, because a bypass applies to a whole ruleset.
