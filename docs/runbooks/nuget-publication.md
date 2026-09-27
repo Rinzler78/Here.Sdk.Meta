@@ -182,10 +182,11 @@ index later still. Do not announce a package as available until
 | A feature branch could publish | The policy matches the file name, never the ref | The `release` environment, restricted to tags `v*` |
 | The `release` environment still admits `master` after re-provisioning | Adding the tag policy left the old branch policy in place | `_provision-forge.sh` deletes every policy other than tags `v*` |
 | Administrators could move a release tag | A bypass applies to every rule of its ruleset | Immutability and creation are two rulesets |
+| Every release tag refused as lightweight | On a tag push, `actions/checkout` tests the tag by comparing the commit with `git rev-parse refs/tags/<tag>` — the tag object's SHA for an annotated tag — so the test always fails and a second fetch of `+<commit>:refs/tags/<tag>` rewrites it as lightweight (seen in the `v0.1.1` run's log) | `_release-tag.sh` fetches the tag from `origin` before reading it |
 | A clone reports itself bare after a commit | A `git init` run from a hook inside a worktree inherits `GIT_DIR` and re-initialises the real repository with `core.bare=true` | Scripts and tests unset every inherited `GIT_*` variable; repair with `git config core.bare false` |
 
 ## Record of repositories provisioned
 
 | Repository | Date | Packages in the policy | Forge settings | Policy |
 |---|---|---|---|---|
-| `Rinzler78.Toolkit` | 2026-09-24 | `Rinzler78.Build`, `Rinzler78.Templates` | `_provision-forge.sh`, 2026-09-26 | active — `0.1.0` published 2026-09-24 |
+| `Rinzler78.Toolkit` | 2026-09-24 | `Rinzler78.Build`, `Rinzler78.Templates` | `_provision-forge.sh`, 2026-09-26 | active — `0.1.0` published 2026-09-24; `0.1.1`, the first tag-driven release, 2026-09-27 |
