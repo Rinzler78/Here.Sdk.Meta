@@ -46,9 +46,27 @@ that no agent depends on another's configuration:
 | `.claude/settings.json` | permissions, hooks, status line, environment |
 | `.claude/agents/`, `.claude/commands/` | the repository's domain reviewers and commands |
 | `.agents/skills/`, `.claude/skills/` | the seventeen vendored skills |
+| `WORKFLOW.md` | how work is delivered and released, and where an agent stops and asks |
 
 `CLAUDE.md` and `AGENTS.md` SHALL stay in agreement; a check SHALL fail the build if
-their shared sections diverge. The previous ecosystem had no `AGENTS.md` anywhere,
+their shared sections diverge.
+
+`WORKFLOW.md` SHALL be a harness file, identical in every repository, and both entry
+points SHALL refer to it. It SHALL state the delivery loop an agent follows without
+asking — local review of code, tests and documentation alike, the forge's review,
+every finding fixed or refuted with evidence and reviewed again, and a pull request
+green only when no finding is open, no merge conflict exists and the required checks
+pass — the release procedure from the version proposal to the indexed package, and
+the exhaustive list of points where an agent stops and asks: a release tag not
+approved, anything on the package registry account, a decision contradicting a
+written rule, and a lazy mechanism. A rule that lived only in an agent's session
+memory was a rule the next agent did not have.
+
+#### Scenario: an agent on a fresh clone knows when to stop
+- **GIVEN** an agent opened on a single repository, with no other context
+- **WHEN** its pull request turns green
+- **THEN** it merges, pulls and cleans without asking, and asks before pushing a
+  release tag nobody approved The previous ecosystem had no `AGENTS.md` anywhere,
 leaving Codex with no entry point at all.
 
 #### Scenario: an agent opened on a bare clone knows where it is

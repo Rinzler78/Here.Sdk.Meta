@@ -70,6 +70,7 @@ It applies, and re-applies without harm:
   required and bound to GitHub Actions;
 - `master`: pull request, merge commits only, signed, the same checks, no linear
   history — a promotion keeps `develop`'s history;
+- Copilot reviewing every push to a pull request into either branch;
 - tags `v*`: neither updatable nor deletable by anyone, and created by administrators
   only — two rulesets, because a bypass applies to a whole ruleset.
 

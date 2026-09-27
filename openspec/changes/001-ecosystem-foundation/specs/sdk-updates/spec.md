@@ -102,8 +102,8 @@ transformation.
 ### Requirement: The surface diff decides the version, not the commit label
 
 The published version SHALL be derived from the `PublicAPI.Unshipped.txt` diff: a
-removed or reshaped member forces a major, an added member a minor, an empty diff a
-patch. A release whose version contradicts its diff SHALL fail its own release
+removed or reshaped member forces a major — a minor before 1.0.0, as `release-flow`
+states — an added member a minor, an empty diff a patch. A release whose version contradicts its diff SHALL fail its own release
 check.
 
 Conventional Commits remain the authoring convention, but they SHALL NOT be the

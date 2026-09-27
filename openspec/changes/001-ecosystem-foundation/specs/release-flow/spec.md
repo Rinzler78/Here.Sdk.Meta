@@ -99,7 +99,12 @@ three labels the NuGet documentation defines, sorted alphabetically in the order
 their stability, with `rc.10` sorting after `rc.2`.
 
 A removed or changed public member SHALL require the `!` commit prefix, the
-`breaking-change` label and a major bump. The authority is the surface diff defined
+`breaking-change` label and a major bump — a minor bump before 1.0.0, where SemVer
+declares the public API unstable. 1.0.0 SHALL be a deliberate decision, never the
+consequence of a commit. A package with no public API surface — a props/targets
+package, a template pack — SHALL take its version from the Conventional Commits since
+the last tag: `feat` a minor change, `fix` a patch, `!` a breaking one. A proposed
+release version SHALL cite the diff or the commits it follows from. The authority is the surface diff defined
 in `sdk-updates`, not the commit prefix: a mislabelled commit fails its release
 check rather than publishing a breaking change as a minor. A build of an untagged
 commit SHALL carry a prerelease version computed from the last tag and the number of
@@ -365,6 +370,9 @@ At minimum:
   deployment policy SHALL be removed, not merely outnumbered.
 - **The rulesets of `Blocking checks are automated` SHALL be applied** — both
   long-lived branches, the immutable release tags, and their creation by administrators.
+- **Copilot SHALL review every push** to a pull request into either long-lived branch,
+  through the ruleset's `copilot_code_review` rule, so that the review loop of
+  `WORKFLOW.md` never depends on an agent remembering to request it.
 
 The provisioning step is `scripts/_provision-forge.sh`, delivered by the template and
 idempotent.

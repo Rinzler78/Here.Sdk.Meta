@@ -42,7 +42,7 @@ public before extraction is complete.
       a `README.md` with the required sections and the check that keeps it true,
       `.github/ISSUE_TEMPLATE/`, the thirteen labels, the tag-driven release workflow
       and its tag check, MinVer, the `lockfile-sync` workflow, the forge provisioning
-      script, DocFX, the script facade,
+      script, `WORKFLOW.md`, DocFX, the script facade,
       and a `net10.0` xUnit v3 test project at `tests/<PackageId>.Tests` — the
       single test framework of the ecosystem, no project targeting a platform
       moniker — wired to `AwesomeAssertions`, `NSubstitute` and
