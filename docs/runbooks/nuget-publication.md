@@ -132,8 +132,13 @@ window; a public repository's policy is active immediately.
    checks are the costly ones; nothing expensive is discovered after this point.
 2. When certain, tag the merge commit and push the tag:
 
+   The tag's message is the version, then the evidence the proposal cited — the
+   Conventional Commits since the previous tag, or the surface diff:
+
    ```bash
-   git fetch origin && git tag --sign --annotate v0.2.0 --message v0.2.0 origin/master
+   git fetch origin --tags
+   { echo v0.2.0; echo; git log --no-merges --format='- %s' v0.1.1..origin/master; } |
+     git tag --sign --annotate v0.2.0 --file - origin/master
    git push origin v0.2.0
    ```
 
