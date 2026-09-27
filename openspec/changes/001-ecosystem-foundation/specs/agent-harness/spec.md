@@ -49,7 +49,8 @@ that no agent depends on another's configuration:
 | `WORKFLOW.md` | how work is delivered and released, and where an agent stops and asks |
 
 `CLAUDE.md` and `AGENTS.md` SHALL stay in agreement; a check SHALL fail the build if
-their shared sections diverge.
+their shared sections diverge. The previous ecosystem had no `AGENTS.md` anywhere,
+leaving Codex with no entry point at all.
 
 `WORKFLOW.md` SHALL be a harness file, identical in every repository, and both entry
 points SHALL refer to it. It SHALL state the delivery loop an agent follows without
@@ -66,8 +67,7 @@ memory was a rule the next agent did not have.
 - **GIVEN** an agent opened on a single repository, with no other context
 - **WHEN** its pull request turns green
 - **THEN** it merges, pulls and cleans without asking, and asks before pushing a
-  release tag nobody approved The previous ecosystem had no `AGENTS.md` anywhere,
-leaving Codex with no entry point at all.
+  release tag nobody approved
 
 #### Scenario: an agent opened on a bare clone knows where it is
 - **GIVEN** a fresh clone opened by any agent family

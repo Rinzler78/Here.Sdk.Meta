@@ -127,7 +127,7 @@ Propagation therefore takes two shapes, selected by the verdict:
   the topological cascade opens the bump pull requests in the next wave, lock files
   are regenerated, and they merge on green. No repository above has any work.
 - **Non-empty diff** — the projected surface moved. The published major is the
-  signal. The bump pull request SHALL carry the generated surface diff as a
+  signal — the minor, before 1.0.0. The bump pull request SHALL carry the generated surface diff as a
   diagnostic attachment, so the downstream repository receives what changed rather
   than a red build to decompose. The decision to accept, adapt or defer stays with
   that repository, which opens its own proposal in its own OpenSpec tree.
@@ -139,7 +139,7 @@ Propagation therefore takes two shapes, selected by the verdict:
 - **AND** no proposal is opened in any repository above
 
 #### Scenario: a downstream repository decides for itself
-- **GIVEN** a binding publishes a major after a surface change
+- **GIVEN** a binding publishes a major after a surface change — a minor before 1.0.0
 - **WHEN** the bump pull request reaches `Here.Sdk.Standard`
 - **THEN** it carries the surface diff as a diagnostic
 - **AND** the proposal adapting the contracts is authored in `Here.Sdk.Standard`,
