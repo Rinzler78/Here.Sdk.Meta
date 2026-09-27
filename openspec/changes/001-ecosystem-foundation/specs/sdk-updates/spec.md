@@ -102,9 +102,9 @@ transformation.
 ### Requirement: The surface diff decides the version, not the commit label
 
 The published version SHALL be derived from the `PublicAPI.Unshipped.txt` diff: a
-removed or reshaped member forces a major — a minor before 1.0.0, as `release-flow`
-states — an added member a minor, an empty diff a patch. A release whose version contradicts its diff SHALL fail its own release
-check.
+removed or reshaped member forces a major from 1.0.0 onwards and a minor before it, as
+`release-flow` states, an added member a minor, an empty diff a patch. A release
+whose version contradicts its diff SHALL fail its own release check.
 
 Conventional Commits remain the authoring convention, but they SHALL NOT be the
 authority: a mislabelled commit would otherwise publish a breaking change as a minor
@@ -142,7 +142,8 @@ Propagation therefore takes three shapes, selected by the verdict:
 - **AND** no proposal is opened in any repository above
 
 #### Scenario: a downstream repository decides for itself
-- **GIVEN** a binding publishes a major after a surface change — a minor before 1.0.0
+- **GIVEN** a binding publishes a breaking bump — a major from 1.0.0 onwards, a minor
+  before — after a member was removed or reshaped
 - **WHEN** the bump pull request reaches `Here.Sdk.Standard`
 - **THEN** it carries the surface diff as a diagnostic
 - **AND** the proposal adapting the contracts is authored in `Here.Sdk.Standard`,

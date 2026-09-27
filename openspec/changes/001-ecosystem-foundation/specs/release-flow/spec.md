@@ -73,7 +73,7 @@ assertion:
 | Reviewer | Asserts |
 |---|---|
 | `spec-reviewer` | The change implements the OpenSpec delta it claims, and every requirement touched has at least one scenario exercised by a test. |
-| `package-api-reviewer` | The `PublicAPI.Unshipped.txt` diff matches the version intent — no removed or changed public member without both `breaking-change` and the breaking bump: a major, or a minor before 1.0.0. |
+| `package-api-reviewer` | The `PublicAPI.Unshipped.txt` diff matches the version intent — no removed or changed public member without the `!` commit prefix, the `breaking-change` label and the breaking bump together: a major from 1.0.0 onwards, a minor before. |
 
 The domain reviewers join the required checks when they exist. Until then the required
 checks are the build and static quality alone: the `verify` and `lint` jobs of the
