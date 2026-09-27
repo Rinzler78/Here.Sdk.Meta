@@ -68,7 +68,9 @@ public before extraction is complete.
       audit: a read-only workflow token that cannot approve pull requests, the `release`
       environment admitting tags `v*` only, `develop` (pull request, squash, linear,
       signed, checks bound to GitHub Actions), `master` (pull request, merge commits,
-      signed, same checks), immutable tags `v*` created by administrators only.
+      signed, same checks), immutable tags `v*` created by administrators only, and
+      Copilot reviewing every push to a pull request into either branch
+      (`copilot_code_review`), each verified by the audit.
       Applied to `Rinzler78.Toolkit` on 2026-09-26, the hand-made ruleset and the branch
       the previous, bot-driven release flow left behind removed. The required checks are
       `verify` and `lint`: no task yet schedules `spec-reviewer` and
