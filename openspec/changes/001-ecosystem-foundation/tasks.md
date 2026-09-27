@@ -76,6 +76,12 @@ public before extraction is complete.
       `verify` and `lint`: no task yet schedules `spec-reviewer` and
       `package-api-reviewer`, which `release-flow` also requires. `Here.Sdk.Meta` gets it with 1.8, once it carries
       the CI whose checks the rulesets require; the other seventeen at creation
+- [ ] 1.6b Release check for packages with no public API surface — the toolchain's
+      props/targets packages and template pack: refuse a tag whose version disagrees
+      with the Conventional Commits since the previous tag (`feat` minor, `fix` patch,
+      `!` breaking, minor before 1.0.0), and require the annotated tag's message to
+      carry the evidence the proposal cited; 1.0.0 after a 0.x version only with the
+      ADR declaring the surface stable
 - [ ] 1.6 Publish the three toolchain packages. Publication is keyless: a trusted
       publishing policy per repository, scoped to the identifiers that repository
       publishes and never to the whole namespace, registered on nuget.org before the
