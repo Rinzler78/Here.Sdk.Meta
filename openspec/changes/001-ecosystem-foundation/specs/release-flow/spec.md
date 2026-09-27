@@ -101,7 +101,9 @@ their stability, with `rc.10` sorting after `rc.2`.
 A removed or changed public member SHALL require the `!` commit prefix, the
 `breaking-change` label and a major bump — a minor bump before 1.0.0, where SemVer
 declares the public API unstable. 1.0.0 SHALL be a deliberate decision, never the
-consequence of a commit. A package with no public API surface — a props/targets
+consequence of a commit: an ADR of the repository declares its public surface stable,
+the proposed version cites it, and the release check SHALL accept 1.0.0 after a 0.x
+version only when that ADR exists. A package with no public API surface — a props/targets
 package, a template pack — SHALL take its version from the Conventional Commits since
 the last tag: `feat` a minor change, `fix` a patch, `!` a breaking one — a major, or
 a minor before 1.0.0, like any breaking change. A proposed

@@ -220,7 +220,8 @@ public before extraction is complete.
       never executed in the unit pass
 - [ ] 8.7 Release check asserting the published version matches the
       `PublicAPI.Unshipped.txt` diff — a removed or reshaped member forces a major, or
-      a minor before 1.0.0, whatever the commit prefix says
+      a minor before 1.0.0, whatever the commit prefix says; 1.0.0 after a 0.x version
+      only with the ADR declaring the public surface stable
 - [ ] 8.8 Verify integration tests skip cleanly with no credentials configured, exit
       code zero
 
