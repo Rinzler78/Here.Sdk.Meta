@@ -102,9 +102,11 @@ transformation.
 ### Requirement: The surface diff decides the version, not the commit label
 
 The published version SHALL be derived from the `PublicAPI.Unshipped.txt` diff: a
-removed or reshaped member forces a major, an added member a minor, an empty diff a
-patch. A release whose version contradicts its diff SHALL fail its own release
-check.
+removed or reshaped member forces a major from 1.0.0 onwards and a minor before it, as
+`release-flow` states, an added member a minor, an empty diff a patch. A release
+whose version contradicts its diff SHALL fail its own release check — except 1.0.0
+after a 0.x version, which the stability ADR of `release-flow` authorises whatever the
+diff.
 
 Conventional Commits remain the authoring convention, but they SHALL NOT be the
 authority: a mislabelled commit would otherwise publish a breaking change as a minor
@@ -121,15 +123,18 @@ Repositories are autonomous. `Meta` SHALL detect, inform and aggregate; it SHALL
 open a proposal, own a decision or choreograph work on another repository's behalf.
 The protocol between repositories is the published package and its version.
 
-Propagation therefore takes two shapes, selected by the verdict:
+Propagation therefore takes three shapes, selected by the verdict:
 
 - **Empty diff** — the upgrade changed nothing observable. The binding republishes,
   the topological cascade opens the bump pull requests in the next wave, lock files
   are regenerated, and they merge on green. No repository above has any work.
-- **Non-empty diff** — the projected surface moved. The published major is the
-  signal. The bump pull request SHALL carry the generated surface diff as a
-  diagnostic attachment, so the downstream repository receives what changed rather
-  than a red build to decompose. The decision to accept, adapt or defer stays with
+- **Additive diff** — members were added, none removed or reshaped. The binding
+  publishes a minor, and the cascade proceeds as for an empty diff: nothing above
+  breaks, and adopting the new surface is each repository's own proposal.
+- **Breaking diff** — a member was removed or reshaped. The breaking bump — a major,
+  or a minor before 1.0.0 — is the signal. The bump pull request SHALL carry the
+  generated surface diff as a diagnostic attachment, so the downstream repository
+  receives what changed rather than a red build to decompose. The decision to accept, adapt or defer stays with
   that repository, which opens its own proposal in its own OpenSpec tree.
 
 #### Scenario: a patch upgrade costs nothing above
@@ -139,7 +144,8 @@ Propagation therefore takes two shapes, selected by the verdict:
 - **AND** no proposal is opened in any repository above
 
 #### Scenario: a downstream repository decides for itself
-- **GIVEN** a binding publishes a major after a surface change
+- **GIVEN** a binding publishes a breaking bump — a major from 1.0.0 onwards, a minor
+  before — after a member was removed or reshaped
 - **WHEN** the bump pull request reaches `Here.Sdk.Standard`
 - **THEN** it carries the surface diff as a diagnostic
 - **AND** the proposal adapting the contracts is authored in `Here.Sdk.Standard`,

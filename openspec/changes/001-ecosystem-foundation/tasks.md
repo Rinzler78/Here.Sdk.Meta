@@ -42,7 +42,7 @@ public before extraction is complete.
       a `README.md` with the required sections and the check that keeps it true,
       `.github/ISSUE_TEMPLATE/`, the thirteen labels, the tag-driven release workflow
       and its tag check, MinVer, the `lockfile-sync` workflow, the forge provisioning
-      script, DocFX, the script facade,
+      script, `WORKFLOW.md`, DocFX, the script facade,
       and a `net10.0` xUnit v3 test project at `tests/<PackageId>.Tests` — the
       single test framework of the ecosystem, no project targeting a platform
       moniker — wired to `AwesomeAssertions`, `NSubstitute` and
@@ -68,12 +68,22 @@ public before extraction is complete.
       audit: a read-only workflow token that cannot approve pull requests, the `release`
       environment admitting tags `v*` only, `develop` (pull request, squash, linear,
       signed, checks bound to GitHub Actions), `master` (pull request, merge commits,
-      signed, same checks), immutable tags `v*` created by administrators only.
+      signed, same checks), immutable tags `v*` created by administrators only, and
+      Copilot reviewing every push to a pull request into either branch
+      (`copilot_code_review`), each verified by the audit.
       Applied to `Rinzler78.Toolkit` on 2026-09-26, the hand-made ruleset and the branch
       the previous, bot-driven release flow left behind removed. The required checks are
       `verify` and `lint`: no task yet schedules `spec-reviewer` and
       `package-api-reviewer`, which `release-flow` also requires. `Here.Sdk.Meta` gets it with 1.8, once it carries
       the CI whose checks the rulesets require; the other seventeen at creation
+- [ ] 1.6b Release check for packages with no public API surface — the toolchain's
+      props/targets packages and template pack: refuse a tag whose version disagrees
+      with the Conventional Commits since the previous tag — `!` or a `BREAKING
+      CHANGE` footer breaking (minor before 1.0.0), `feat` minor, `fix` and `perf`
+      patch, other types no effect, the strongest effect deciding, no release for a
+      range with none — and require the annotated tag's message to carry the evidence
+      the proposal cited; 1.0.0 after a 0.x version when, and only when, the ADR
+      declaring the surface stable exists, whatever the commits
 - [ ] 1.6 Publish the three toolchain packages. Publication is keyless: a trusted
       publishing policy per repository, scoped to the identifiers that repository
       publishes and never to the whole namespace, registered on nuget.org before the
@@ -217,8 +227,12 @@ public before extraction is complete.
       `Rest`, the three binding repositories and `Navigation`, and nowhere else,
       never executed in the unit pass
 - [ ] 8.7 Release check asserting the published version matches the
-      `PublicAPI.Unshipped.txt` diff — a removed or reshaped member forces a major,
-      whatever the commit prefix says
+      `PublicAPI.Unshipped.txt` diff — an empty diff a patch, an additive diff a
+      minor, a removed or reshaped member a major, or a minor before 1.0.0, whatever
+      the commit prefix says — with one exception: 1.0.0 after a 0.x version is
+      accepted when, and only when, the ADR declaring the public surface stable
+      exists, whatever the diff; and the annotated tag's message carrying the evidence
+      the proposal cited
 - [ ] 8.8 Verify integration tests skip cleanly with no credentials configured, exit
       code zero
 

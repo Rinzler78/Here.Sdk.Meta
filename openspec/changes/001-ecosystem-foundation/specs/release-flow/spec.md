@@ -55,6 +55,11 @@ request and the status checks, with signed commits and blocked force-push and
 deletion, administrators included — without bypass.
 
 - `develop` SHALL accept squashed pull requests only, with a linear history.
+- `master` SHALL accept pull requests from this repository's `develop` only. No ruleset
+  can restrict a source branch, so a required check, `promotion-source`, SHALL enforce
+  it — run through `pull_request_target`, from the base branch's own copy of the
+  workflow and without checking out the pull request, so that no pull request can
+  rewrite the gate it is judged by.
 - `master` SHALL accept merge commits only, and SHALL NOT require a linear history. A
   promotion keeps `develop`'s history, so the base of the next promotion advances and
   its pull request shows only what is new. A squashed promotion would leave the base
@@ -73,7 +78,7 @@ assertion:
 | Reviewer | Asserts |
 |---|---|
 | `spec-reviewer` | The change implements the OpenSpec delta it claims, and every requirement touched has at least one scenario exercised by a test. |
-| `package-api-reviewer` | The `PublicAPI.Unshipped.txt` diff matches the version intent — no removed or changed public member without `breaking-change` and a major bump. |
+| `package-api-reviewer` | The `PublicAPI.Unshipped.txt` diff matches the version intent — no removed or changed public member without the `!` commit prefix, the `breaking-change` label and the breaking bump together: a major from 1.0.0 onwards, a minor before. |
 
 The domain reviewers join the required checks when they exist. Until then the required
 checks are the build and static quality alone: the `verify` and `lint` jobs of the
@@ -99,9 +104,25 @@ three labels the NuGet documentation defines, sorted alphabetically in the order
 their stability, with `rc.10` sorting after `rc.2`.
 
 A removed or changed public member SHALL require the `!` commit prefix, the
-`breaking-change` label and a major bump. The authority is the surface diff defined
-in `sdk-updates`, not the commit prefix: a mislabelled commit fails its release
-check rather than publishing a breaking change as a minor. A build of an untagged
+`breaking-change` label and the breaking bump: a major from 1.0.0 onwards, a minor
+before it, where SemVer declares the public API unstable. The authority is the surface
+diff defined in `sdk-updates`, not the commit prefix: a mislabelled commit fails its
+release check rather than publishing a breaking change as a minor.
+
+1.0.0 SHALL be a deliberate decision, never the consequence of a commit or a diff: an
+ADR of the repository declares its public surface stable, the proposed version cites
+it, and the release check SHALL accept 1.0.0 after a 0.x version when, and only when,
+that ADR exists — whatever the diff or the commits would otherwise require.
+
+A package with no public API surface — a props/targets package, a template pack —
+SHALL take its version from the Conventional Commits since the last tag. `!`, or a
+`BREAKING CHANGE` footer, is a breaking change; `feat` a minor one; `fix` and `perf` a
+patch; every other type — `chore`, `docs`, `refactor`, `test`, `build`, `ci`, `style`
+— has no effect on the version. The strongest effect in the range decides, and a range
+with no effect calls for no release.
+
+A proposed release version SHALL cite its evidence — the surface diff, the commits, or
+the stability ADR — and the annotated tag's message SHALL carry it. A build of an untagged
 commit SHALL carry a prerelease version computed from the last tag and the number of
 commits since it, its height — `1.2.1-alpha.0.3` three commits after `v1.2.0`,
 `1.2.0-rc.1.3` three commits after `v1.2.0-rc.1` — and is never published.
@@ -154,8 +175,7 @@ The irreversibility of a push to nuget.org is accepted and bounded instead:
 - the costly checks run on the promotion pull request into `master`, before any tag
   can name its commit;
 - before anything is built, the release workflow SHALL refuse a tag outside that form,
-  a lightweight tag, a tag whose signature GitHub does not verify, and a tag on a
-  commit `master` does not contain;
+  a lightweight tag, a tag whose signature GitHub does not verify, and a tag on a commit that `master` does not contain;
 - tags cannot be moved or deleted, and only administrators create them;
 - every package SHALL carry exactly the tag's version, read from the version its
   manifest declares rather than from its file name, checked before the credential is
@@ -365,6 +385,9 @@ At minimum:
   deployment policy SHALL be removed, not merely outnumbered.
 - **The rulesets of `Blocking checks are automated` SHALL be applied** — both
   long-lived branches, the immutable release tags, and their creation by administrators.
+- **Copilot SHALL review every push** to a pull request into either long-lived branch,
+  through the ruleset's `copilot_code_review` rule, so that the review loop of
+  `WORKFLOW.md` never depends on someone remembering to request it.
 
 The provisioning step is `scripts/_provision-forge.sh`, delivered by the template and
 idempotent.

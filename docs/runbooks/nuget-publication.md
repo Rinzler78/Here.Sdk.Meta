@@ -19,7 +19,7 @@ A repository generated from `Rinzler78.Templates` arrives with:
   tree, asks GitHub for an OIDC token **immediately before the push**, publishes, and
   creates the GitHub release with generated notes;
 - `scripts/_release-tag.sh` — refuses a tag outside `vMAJOR.MINOR.PATCH[-(alpha|beta|rc).N]`,
-  a lightweight tag, a tag whose signature GitHub does not verify, and a tag on a commit
+  a lightweight tag, a tag whose signature GitHub does not verify, and a tag on a commit that
   `master` does not contain;
 - MinVer, in `Directory.Packages.props` — the version comes from the tags alone;
 - `scripts/publish.sh` — refuses any package whose manifest does not declare
@@ -68,8 +68,13 @@ It applies, and re-applies without harm:
   deleted, not merely outnumbered;
 - `develop`: pull request, squash only, linear history, signed, `verify` and `lint`
   required and bound to GitHub Actions;
-- `master`: pull request, merge commits only, signed, the same checks, no linear
-  history — a promotion keeps `develop`'s history;
+- `master`: pull request, merge commits only, signed, the same checks plus
+  `promotion-source` — `promotion.yml`, run from `master`'s own copy through
+  `pull_request_target`, refusing any source but this repository's `develop` — and no
+  linear history, since a promotion keeps `develop`'s history. `master` must carry
+  `promotion.yml` before the check is required, or no pull request into it can merge:
+  a generated repository has it from creation;
+- Copilot reviewing every push to a pull request into either branch;
 - tags `v*`: neither updatable nor deletable by anyone, and created by administrators
   only — two rulesets, because a bypass applies to a whole ruleset.
 
@@ -131,10 +136,25 @@ window; a public repository's policy is active immediately.
    checks are the costly ones; nothing expensive is discovered after this point.
 2. When certain, tag the merge commit and push the tag:
 
+   The tag's message is the version, then the evidence the proposal cited — the
+   Conventional Commits since the previous tag, or the surface diff:
+
    ```bash
-   git fetch origin && git tag --sign --annotate v0.2.0 --message v0.2.0 origin/master
+   git fetch origin --tags
+   # Empty before a repository's first release: the log then covers all history.
+   previous=$(git describe --tags --abbrev=0 origin/master 2>/dev/null || true)
+   # Subjects and bodies: a BREAKING CHANGE footer is evidence too.
+   { echo v0.2.0; echo; git log --no-merges --format='- %s%n%b' "${previous:+$previous..}origin/master"; } |
+     git tag --sign --annotate v0.2.0 --file - origin/master
    git push origin v0.2.0
    ```
+
+   For a version derived from a public API, the evidence is the surface diff: replace
+   the `git log` line with
+   `git diff "${previous:-$(git hash-object -t tree /dev/null)}" origin/master -- '*PublicAPI.Unshipped.txt'`,
+   against the empty tree before the first release. **1.0.0 after a 0.x version** is
+   accepted only with an ADR of the repository declaring its public surface stable:
+   add that ADR's path to the message; without it the release check refuses 1.0.0.
 
    The push publishes, directly. There is no draft and no second gesture: the tag check,
    the immutable tags and the promotion pull request are what bound an irreversible push.
