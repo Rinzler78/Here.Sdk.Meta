@@ -73,7 +73,7 @@ assertion:
 | Reviewer | Asserts |
 |---|---|
 | `spec-reviewer` | The change implements the OpenSpec delta it claims, and every requirement touched has at least one scenario exercised by a test. |
-| `package-api-reviewer` | The `PublicAPI.Unshipped.txt` diff matches the version intent — no removed or changed public member without `breaking-change` and a major bump, or a minor bump before 1.0.0. |
+| `package-api-reviewer` | The `PublicAPI.Unshipped.txt` diff matches the version intent — no removed or changed public member without both `breaking-change` and the breaking bump: a major, or a minor before 1.0.0. |
 
 The domain reviewers join the required checks when they exist. Until then the required
 checks are the build and static quality alone: the `verify` and `lint` jobs of the
@@ -372,7 +372,7 @@ At minimum:
   long-lived branches, the immutable release tags, and their creation by administrators.
 - **Copilot SHALL review every push** to a pull request into either long-lived branch,
   through the ruleset's `copilot_code_review` rule, so that the review loop of
-  `WORKFLOW.md` never depends on an agent remembering to request it.
+  `WORKFLOW.md` never depends on someone remembering to request it.
 
 The provisioning step is `scripts/_provision-forge.sh`, delivered by the template and
 idempotent.
