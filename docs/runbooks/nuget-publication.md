@@ -137,14 +137,19 @@ window; a public repository's policy is active immediately.
 
    ```bash
    git fetch origin --tags
-   previous=$(git describe --tags --abbrev=0 origin/master)
-   { echo v0.2.0; echo; git log --no-merges --format='- %s' "$previous..origin/master"; } |
+   # Empty before a repository's first release: the log then covers all history.
+   previous=$(git describe --tags --abbrev=0 origin/master 2>/dev/null || true)
+   { echo v0.2.0; echo; git log --no-merges --format='- %s' "${previous:+$previous..}origin/master"; } |
      git tag --sign --annotate v0.2.0 --file - origin/master
    git push origin v0.2.0
    ```
 
    For a version derived from a public API, the evidence is the surface diff: replace
-   the `git log` line with `git diff "$previous" origin/master -- '*PublicAPI.Unshipped.txt'`.
+   the `git log` line with
+   `git diff "${previous:-$(git hash-object -t tree /dev/null)}" origin/master -- '*PublicAPI.Unshipped.txt'`,
+   against the empty tree before the first release. **1.0.0 after a 0.x version** is
+   accepted only with an ADR of the repository declaring its public surface stable:
+   add that ADR's path to the message; without it the release check refuses 1.0.0.
 
    The push publishes, directly. There is no draft and no second gesture: the tag check,
    the immutable tags and the promotion pull request are what bound an irreversible push.
