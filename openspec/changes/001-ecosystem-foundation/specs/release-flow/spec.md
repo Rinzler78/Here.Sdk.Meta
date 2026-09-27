@@ -162,8 +162,7 @@ The irreversibility of a push to nuget.org is accepted and bounded instead:
 - the costly checks run on the promotion pull request into `master`, before any tag
   can name its commit;
 - before anything is built, the release workflow SHALL refuse a tag outside that form,
-  a lightweight tag, a tag whose signature GitHub does not verify, and a tag on a
-  commit `master` does not contain;
+  a lightweight tag, a tag whose signature GitHub does not verify, and a tag on a commit that `master` does not contain;
 - tags cannot be moved or deleted, and only administrators create them;
 - every package SHALL carry exactly the tag's version, read from the version its
   manifest declares rather than from its file name, checked before the credential is

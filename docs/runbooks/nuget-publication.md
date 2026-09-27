@@ -19,7 +19,7 @@ A repository generated from `Rinzler78.Templates` arrives with:
   tree, asks GitHub for an OIDC token **immediately before the push**, publishes, and
   creates the GitHub release with generated notes;
 - `scripts/_release-tag.sh` — refuses a tag outside `vMAJOR.MINOR.PATCH[-(alpha|beta|rc).N]`,
-  a lightweight tag, a tag whose signature GitHub does not verify, and a tag on a commit
+  a lightweight tag, a tag whose signature GitHub does not verify, and a tag on a commit that
   `master` does not contain;
 - MinVer, in `Directory.Packages.props` — the version comes from the tags alone;
 - `scripts/publish.sh` — refuses any package whose manifest does not declare
