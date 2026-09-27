@@ -103,7 +103,8 @@ A removed or changed public member SHALL require the `!` commit prefix, the
 declares the public API unstable. 1.0.0 SHALL be a deliberate decision, never the
 consequence of a commit. A package with no public API surface — a props/targets
 package, a template pack — SHALL take its version from the Conventional Commits since
-the last tag: `feat` a minor change, `fix` a patch, `!` a breaking one. A proposed
+the last tag: `feat` a minor change, `fix` a patch, `!` a breaking one — a major, or
+a minor before 1.0.0, like any breaking change. A proposed
 release version SHALL cite the diff or the commits it follows from. The authority is the surface diff defined
 in `sdk-updates`, not the commit prefix: a mislabelled commit fails its release
 check rather than publishing a breaking change as a minor. A build of an untagged

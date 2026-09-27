@@ -121,14 +121,17 @@ Repositories are autonomous. `Meta` SHALL detect, inform and aggregate; it SHALL
 open a proposal, own a decision or choreograph work on another repository's behalf.
 The protocol between repositories is the published package and its version.
 
-Propagation therefore takes two shapes, selected by the verdict:
+Propagation therefore takes three shapes, selected by the verdict:
 
 - **Empty diff** — the upgrade changed nothing observable. The binding republishes,
   the topological cascade opens the bump pull requests in the next wave, lock files
   are regenerated, and they merge on green. No repository above has any work.
-- **Non-empty diff** — the projected surface moved. The published major is the
-  signal — the minor, before 1.0.0. The bump pull request SHALL carry the generated surface diff as a
-  diagnostic attachment, so the downstream repository receives what changed rather
+- **Additive diff** — members were added, none removed or reshaped. The binding
+  publishes a minor, and the cascade proceeds as for an empty diff: nothing above
+  breaks, and adopting the new surface is each repository's own proposal.
+- **Breaking diff** — a member was removed or reshaped. The breaking bump — a major,
+  or a minor before 1.0.0 — is the signal. The bump pull request SHALL carry the
+  generated surface diff as a diagnostic attachment, so the downstream repository receives what changed rather
   than a red build to decompose. The decision to accept, adapt or defer stays with
   that repository, which opens its own proposal in its own OpenSpec tree.
 
