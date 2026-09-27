@@ -137,10 +137,14 @@ window; a public repository's policy is active immediately.
 
    ```bash
    git fetch origin --tags
-   { echo v0.2.0; echo; git log --no-merges --format='- %s' v0.1.1..origin/master; } |
+   previous=$(git describe --tags --abbrev=0 origin/master)
+   { echo v0.2.0; echo; git log --no-merges --format='- %s' "$previous..origin/master"; } |
      git tag --sign --annotate v0.2.0 --file - origin/master
    git push origin v0.2.0
    ```
+
+   For a version derived from a public API, the evidence is the surface diff: replace
+   the `git log` line with `git diff "$previous" origin/master -- '*PublicAPI.Unshipped.txt'`.
 
    The push publishes, directly. There is no draft and no second gesture: the tag check,
    the immutable tags and the promotion pull request are what bound an irreversible push.
