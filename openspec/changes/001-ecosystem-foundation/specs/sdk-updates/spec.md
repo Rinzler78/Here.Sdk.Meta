@@ -104,7 +104,9 @@ transformation.
 The published version SHALL be derived from the `PublicAPI.Unshipped.txt` diff: a
 removed or reshaped member forces a major from 1.0.0 onwards and a minor before it, as
 `release-flow` states, an added member a minor, an empty diff a patch. A release
-whose version contradicts its diff SHALL fail its own release check.
+whose version contradicts its diff SHALL fail its own release check — except 1.0.0
+after a 0.x version, which the stability ADR of `release-flow` authorises whatever the
+diff.
 
 Conventional Commits remain the authoring convention, but they SHALL NOT be the
 authority: a mislabelled commit would otherwise publish a breaking change as a minor

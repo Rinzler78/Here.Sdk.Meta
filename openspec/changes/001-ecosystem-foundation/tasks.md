@@ -78,10 +78,12 @@ public before extraction is complete.
       the CI whose checks the rulesets require; the other seventeen at creation
 - [ ] 1.6b Release check for packages with no public API surface — the toolchain's
       props/targets packages and template pack: refuse a tag whose version disagrees
-      with the Conventional Commits since the previous tag (`feat` minor, `fix` patch,
-      `!` breaking, minor before 1.0.0), and require the annotated tag's message to
-      carry the evidence the proposal cited; 1.0.0 after a 0.x version only with the
-      ADR declaring the surface stable
+      with the Conventional Commits since the previous tag — `!` or a `BREAKING
+      CHANGE` footer breaking (minor before 1.0.0), `feat` minor, `fix` and `perf`
+      patch, other types no effect, the strongest effect deciding, no release for a
+      range with none — and require the annotated tag's message to carry the evidence
+      the proposal cited; 1.0.0 after a 0.x version when, and only when, the ADR
+      declaring the surface stable exists, whatever the commits
 - [ ] 1.6 Publish the three toolchain packages. Publication is keyless: a trusted
       publishing policy per repository, scoped to the identifiers that repository
       publishes and never to the whole namespace, registered on nuget.org before the
@@ -227,9 +229,10 @@ public before extraction is complete.
 - [ ] 8.7 Release check asserting the published version matches the
       `PublicAPI.Unshipped.txt` diff — an empty diff a patch, an additive diff a
       minor, a removed or reshaped member a major, or a minor before 1.0.0, whatever
-      the commit prefix says; 1.0.0 after a 0.x version
-      only with the ADR declaring the public surface stable; and the annotated tag's
-      message carrying the surface diff the proposal cited
+      the commit prefix says — with one exception: 1.0.0 after a 0.x version is
+      accepted when, and only when, the ADR declaring the public surface stable
+      exists, whatever the diff; and the annotated tag's message carrying the evidence
+      the proposal cited
 - [ ] 8.8 Verify integration tests skip cleanly with no credentials configured, exit
       code zero
 

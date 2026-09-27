@@ -99,17 +99,25 @@ three labels the NuGet documentation defines, sorted alphabetically in the order
 their stability, with `rc.10` sorting after `rc.2`.
 
 A removed or changed public member SHALL require the `!` commit prefix, the
-`breaking-change` label and a major bump — a minor bump before 1.0.0, where SemVer
-declares the public API unstable. 1.0.0 SHALL be a deliberate decision, never the
-consequence of a commit: an ADR of the repository declares its public surface stable,
-the proposed version cites it, and the release check SHALL accept 1.0.0 after a 0.x
-version only when that ADR exists. A package with no public API surface — a props/targets
-package, a template pack — SHALL take its version from the Conventional Commits since
-the last tag: `feat` a minor change, `fix` a patch, `!` a breaking one — a major, or
-a minor before 1.0.0, like any breaking change. A proposed
-release version SHALL cite the diff or the commits it follows from. The authority is the surface diff defined
-in `sdk-updates`, not the commit prefix: a mislabelled commit fails its release
-check rather than publishing a breaking change as a minor. A build of an untagged
+`breaking-change` label and the breaking bump: a major from 1.0.0 onwards, a minor
+before it, where SemVer declares the public API unstable. The authority is the surface
+diff defined in `sdk-updates`, not the commit prefix: a mislabelled commit fails its
+release check rather than publishing a breaking change as a minor.
+
+1.0.0 SHALL be a deliberate decision, never the consequence of a commit or a diff: an
+ADR of the repository declares its public surface stable, the proposed version cites
+it, and the release check SHALL accept 1.0.0 after a 0.x version when, and only when,
+that ADR exists — whatever the diff or the commits would otherwise require.
+
+A package with no public API surface — a props/targets package, a template pack —
+SHALL take its version from the Conventional Commits since the last tag. `!`, or a
+`BREAKING CHANGE` footer, is a breaking change; `feat` a minor one; `fix` and `perf` a
+patch; every other type — `chore`, `docs`, `refactor`, `test`, `build`, `ci`, `style`
+— has no effect on the version. The strongest effect in the range decides, and a range
+with no effect calls for no release.
+
+A proposed release version SHALL cite its evidence — the surface diff, the commits, or
+the stability ADR — and the annotated tag's message SHALL carry it. A build of an untagged
 commit SHALL carry a prerelease version computed from the last tag and the number of
 commits since it, its height — `1.2.1-alpha.0.3` three commits after `v1.2.0`,
 `1.2.0-rc.1.3` three commits after `v1.2.0-rc.1` — and is never published.
