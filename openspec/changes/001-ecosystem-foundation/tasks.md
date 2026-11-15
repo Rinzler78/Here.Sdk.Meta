@@ -17,7 +17,9 @@ it, an ADR for each architectural choice, and a green CI. A repository that carr
 assembly also requires a declared coverage and trimming contract, a trimming test
 application for a `Committed` library, and its DocFX site. A task whose sample or
 integration test calls HERE finds its credential set requested by 2.4 and stored by
-1.12; the JavaScript key is the exception, requested by 6.1 before its first use.
+1.12; the JavaScript key is the exception, requested by 6.1 before its first use. A
+scratch repository named in a Done-when is created by hand in the owner's account,
+private, with its publish step stubbed: nothing is ever pushed to nuget.org from one.
 
 ## Phase 0 — Archive and reset
 
@@ -113,13 +115,12 @@ integration test calls HERE finds its credential set requested by 2.4 and stored
 - [ ] 1.8a Reconcile the trimming vocabulary: `quality` names `Committed`, `Analyzed`
       and `OutOfScope`, while `Rinzler78.Build` validates `OutOfScope`, `Trimmable` and
       `AotCompatible`. One of the two changes, by an ADR in `Meta`.
-      A change in `Rinzler78.Build` is published, and the pin in the template's
-      `global.json` follows, before 1.11f.
+      A change in `Rinzler78.Build` is published by 1.8f.
       Done when: spec and `Rinzler78.Build` use the same three values, and a project
       declaring any other fails the build
 - [ ] 1.8b `Rinzler78.Templates` — the coverage gate: the floor per project, the diff
       coverage on a pull request, and a failure for a Reduced or Exempt contract without
-      an ADR.
+      an ADR, test projects excepted: the template declares them Exempt by construction.
       Done when: a scratch project under the floor, and one Exempt without an ADR, each
       fail their pull request
 - [ ] 1.8c `Rinzler78.Templates` — the `Committed` trimming measurement written to the
@@ -131,8 +132,20 @@ integration test calls HERE finds its credential set requested by 2.4 and stored
       optimisation properties of `toolchain`: Debug unoptimised with full symbols,
       Release with every optimisation the project supports (R8, AOT, LLVM, WASM AOT,
       Brotli), the costly ones only in the release workflow, and `AndroidFastDeploymentType`.
+      The `Rinzler78.Build` part is published by 1.8f.
       Done when: a scratch project's Debug build is unoptimised, its Release build
       enables them, and a feature-branch build skips the costly ones
+- [ ] 1.8e `Rinzler78.Build` — the generic mechanisms `Here.Sdk.Build` (1.13) declares
+      against, which Build lacks today: a required README fragment, a rule that no
+      `ProjectReference` crosses a repository boundary, an analyser failing a bare
+      `double` in the public API of a layer that owns its surface, and an architecture
+      check on the compiled assemblies, besides the `PackageReference` check it has.
+      Done when: a scratch consumer violating each fails the build, and a project
+      declaring no policy still builds
+- [ ] 1.8f Publish `Rinzler78.Build` carrying 1.8a, 1.8d and 1.8e, then bump its pin in
+      the template's `global.json`, so the Templates published by 1.11f consume it.
+      Done when: the pin names the published version and a regenerated repository builds
+      against it
 - [ ] 1.9 `Rinzler78.Templates` — release check asserting the published version matches
       the `PublicAPI.Unshipped.txt` diff — an empty diff a patch, an additive diff a
       minor, a removed or reshaped member a major, or a minor before 1.0.0, whatever
@@ -161,10 +174,6 @@ integration test calls HERE finds its credential set requested by 2.4 and stored
       and its extras `dependencies` and `security` are removed.
       Done when: the label file holds exactly those fourteen, and each form applies one
       of them
-- [ ] 1.10m `Rinzler78.Templates` — the triage workflows: `ready-for-agent` refused
-      without exactly one type, `breaking-change` requiring `!` and a migration section,
-      and a `feat` issue with no linked OpenSpec change losing `ready-for-agent`.
-      Done when: each refusal is demonstrated on a scratch pull request
 - [ ] 1.10c `Rinzler78.Templates` — credential-shaped strings: a pre-commit hook and a
       CI check that fail on one, and a packaging check that fails on a credential-shaped
       constant in a package.
@@ -194,9 +203,10 @@ integration test calls HERE finds its credential set requested by 2.4 and stored
       command produces a reviewable commit
 - [ ] 1.10h `Rinzler78.Templates` — `renovate.json`, so the freshness check measures
       real bump pull requests; the check identifies them by their author
-      `renovate[bot]`, not by a label, since `dependencies` is not one of the fourteen. The Renovate application is installed per repository by
-      1.12, a portal step.
-      Done when: a regenerated repository's Renovate configuration validates
+      `renovate[bot]`, not by a label, since `dependencies` is not one of the fourteen. The Renovate application is installed by 1.12 for generated
+      repositories, by 1.11f for the Toolkit and by 1.16 for `Meta`, a portal step.
+      Done when: a regenerated repository's Renovate configuration validates, and the
+      freshness hook flags a seeded stale bump pull request by its author
 - [ ] 1.10i `Rinzler78.Templates` — a suppression without a written justification fails
       the build, as `coding-principles` requires.
       Done when: a seeded bare suppression fails, and a justified one builds
@@ -210,6 +220,21 @@ integration test calls HERE finds its credential set requested by 2.4 and stored
       instructions, as `toolchain` requires.
       Done when: on a machine without the pinned Xcode the script fails and names the
       fix, and `--check` stays non-mutating
+- [ ] 1.10m `Rinzler78.Templates` — the triage workflows: `ready-for-agent` refused
+      without exactly one type, `breaking-change` requiring `!` and a migration section,
+      and a `feat` issue with no linked OpenSpec change losing `ready-for-agent`.
+      Done when: each refusal is demonstrated on a scratch pull request
+- [ ] 1.10n `Rinzler78.Templates` — harness CI support for macOS and Windows jobs: the
+      fork-exclusion condition, and the disjoint matrix routing the Xamarin heads to the
+      self-hosted runner and the modern iOS heads to the hosted image. `ci.yml` is
+      ubuntu-only today and is a byte-identical harness file, so this is a template
+      change.
+      Done when: a scratch workflow routes each head to its runner and a fork pull
+      request never reaches the self-hosted one
+- [ ] 1.10o `Rinzler78.Templates` — the publication workflow of the web demonstrations
+      to GitHub Pages, injecting the demonstration key at publication time, and the
+      check that fails when a server-side key reaches the artefact.
+      Done when: a seeded server-side key in a scratch artefact fails the check
 - [ ] 1.11 The domain reviewers `release-flow` requires, `spec-reviewer` and
       `package-api-reviewer`: written, joined to the required checks in
       `scripts/_provision-forge.sh`, and carried by the template.
@@ -225,8 +250,7 @@ integration test calls HERE finds its credential set requested by 2.4 and stored
 - [ ] 1.11b `Rinzler78.Templates` and `scripts/_provision-forge.sh` — `promotion.yml`,
       run from `master`'s own copy through `pull_request_target`, refusing any source
       but the repository's `develop`, and the `promotion-source` check required on
-      `master` and read back by the verification mode of 1.11a. Neither exists today,
-      although the runbook describes them as applied.
+      `master` and read back by the verification mode of 1.11a. Neither exists today.
       Done when: a promotion pull request from `develop` is accepted and one from any
       other branch is refused, on a scratch repository
 - [ ] 1.11c Decision: the identity the cascade writes with across repositories. No
@@ -244,10 +268,11 @@ integration test calls HERE finds its credential set requested by 2.4 and stored
       `Meta`
 - [ ] 1.11e `Rinzler78.Templates` — `lockfile-sync` serves the cascade as well as
       Renovate: it fires for the cascade's actor and for `global.json`, where the
-      `Rinzler78.Build` SDK is pinned, besides `Directory.Packages.props`. Today it
-      fires only for `renovate[bot]` on `Directory.Packages.props`.
+      `Rinzler78.Build` SDK is pinned, besides `Directory.Packages.props`, and it pushes
+      with the identity of 1.11c, since a push with `GITHUB_TOKEN` raises no checks.
+      Today it fires only for `renovate[bot]` on `Directory.Packages.props`.
       Done when: a bump pull request from the cascade's actor on either file gets its
-      lock file regenerated, in a scratch repository
+      lock file regenerated and its required checks run, in a scratch repository
 - [ ] 1.11f Publish a version of `Rinzler78.Templates` carrying the template tasks 1.6a
       to 1.11e. The Toolkit is the source of its templates, and `scripts/_sync-template.sh`
       with `scripts/hooks/harness-regenerates.sh` keep it identical to them, so those
@@ -259,7 +284,7 @@ integration test calls HERE finds its credential set requested by 2.4 and stored
       since the script requires `promotion-source` and the reviewer checks; and the tag
       comes last.
       Done when: the script's verification mode reports the Toolkit conforming, the
-      tag publishes, and the dispatch reaches a scratch `Meta`
+      tag publishes, and the dispatch step runs and reaches `Meta`
 - [ ] 1.12 The repository provisioning procedure, one script or one runbook section:
       create the repository and its `master` from `develop`, set up commit signing,
       generate it from the latest published version of `Rinzler78.Templates`, record
@@ -267,8 +292,8 @@ integration test calls HERE finds its credential set requested by 2.4 and stored
       `_provision-forge.sh` (Copilot review included), register the nuget.org
       trusted-publishing policy when it publishes — a portal step only you can take —
       store the cascade identity of 1.11c and the HERE credential sets that exist when it
-      runs (2.4 requests them) and belong to it as secrets — portal steps for the Renovate application installation and
-      for giving the cascade identity write access to the repository — wire
+      runs (2.4 requests them) and belong to it as secrets; the Renovate installation and the identity's write access to
+      the repository are portal steps only you can take; wire
       `Here.Sdk.Build` into every generated `Here.Sdk.*` repository but itself, and add it to `Meta` as a
       submodule under `repos/<name>` tracking `develop`. Visibility follows
       `ecosystem-architecture`: the toolchain repositories are public from creation, the
@@ -283,7 +308,7 @@ integration test calls HERE finds its credential set requested by 2.4 and stored
       eight-layer map, the forbidden dependencies of the inward layers, the required
       analysers, and the HERE non-affiliation fragment, required in `<Description>` and in each package
       `README.md`, all declared through the
-      generic mechanism of `Rinzler78.Build`, with the rule that a wrapper holds exactly
+      generic mechanisms of `Rinzler78.Build` as extended by 1.8e, with the rule that a wrapper holds exactly
       one ecosystem package reference and no `ProjectReference` crosses a repository
       boundary.
       Done when: a scratch consumer violating the vocabulary, a forbidden dependency
@@ -304,7 +329,8 @@ integration test calls HERE finds its credential set requested by 2.4 and stored
       rulesets require, and the
       `promotion.yml` of 1.11b on `master` before `promotion-source` is required:
       without it no pull request into `master` can merge.
-      The cascade identity of 1.11c is stored in `Meta` as a secret.
+      The cascade identity of 1.11c is stored in `Meta` as a secret, and the Renovate
+      application is installed on it, a portal step.
       Done when: a pull request into `develop` runs `verify` and `lint` green, and a
       promotion pull request into `master` is judged by `promotion-source`
 - [ ] 1.17 `Meta` — forge settings applied by `_provision-forge.sh`, once 1.16 gives
@@ -338,10 +364,10 @@ integration test calls HERE finds its credential set requested by 2.4 and stored
       Done when: a dispatch for a published `Rinzler78.Build` version is held until
       nuget.org serves it, then released
 - [ ] 1.22a `Meta` — the release cascade, writing side: open the next topological
-      wave's bump pull requests, the wave read from the catalogue of 1.20 (`Directory.Packages.props`, and `global.json` for the
-      `Rinzler78.Build` SDK pin, then `dotnet restore --force-evaluate`, then the
-      regenerated lock file), and wait for
-      green and for publication before the next wave.
+      wave's bump pull requests, the wave read from the catalogue of 1.20, editing
+      `Directory.Packages.props` and `global.json` for the `Rinzler78.Build` SDK pin;
+      the lock file is regenerated by `lockfile-sync` of 1.11e. Wait for green and for
+      publication before the next wave.
       Done when: publishing a `Rinzler78.Build` patch from `Rinzler78.Toolkit` opens a
       green bump pull request in `Here.Sdk.Build` — the first real edge of the graph
 - [ ] 1.23 `Meta` — cascade diagnostic: the bump pull request carries the publishing
@@ -365,7 +391,8 @@ integration test calls HERE finds its credential set requested by 2.4 and stored
       without failure, and the page is published to GitHub Pages
 - [ ] 1.27 `Meta` — scheduled-issue reminders: a ninety-day rotation reminder for each
       HERE secret, and an expiry reminder sixty days ahead for each signing
-      certificate. The jobs read a committed metadata file of names and expiry dates,
+      certificate, and for the cascade identity of 1.11c at the end of its lifetime. The
+      jobs read a committed metadata file of names and expiry dates,
       never a secret value; 9.1 writes the certificates' entries.
       Done when: a fixture of two secrets and one certificate opens the expected
       issues in `Meta`
@@ -461,7 +488,10 @@ integration test calls HERE finds its credential set requested by 2.4 and stored
       demonstrably running with no HERE credential
 - [ ] 3.6 `Core` — extracted from both natives: credentials, cache, logging, resilience
 - [ ] 3.7 `Core` — sample: Blazor Server, secrets held server-side, cache visible
-- [ ] 3.8 Reconcile the native wrappers against the extracted contracts
+- [ ] 3.8 `iOS` and `Android` — reconcile the native wrappers against the extracted
+      contracts.
+      Done when: each wrapper implements the contracts of 3.4, and its tests and samples
+      still pass
 
 ## Phase 4 — Standardisation
 
@@ -494,8 +524,8 @@ integration test calls HERE finds its credential set requested by 2.4 and stored
 
 ## Phase 6 — JavaScript column
 
-- [ ] 6.1 Provision `HERE_JS_DEMO_APIKEY`, whitelisted to the Pages domain, and the
-      check that the server-side key never reaches a Pages artefact. It precedes `Bindings.Js`, whose
+- [ ] 6.1 Provision `HERE_JS_DEMO_APIKEY`, whitelisted to the Pages domain, and wire the
+      Pages check of 1.10o. It precedes `Bindings.Js`, whose
       sample needs the key; its integration tests use the server-side key of 2.4, never
       this one, and the key itself comes from the HERE portal,
       a step only you can take.
@@ -522,7 +552,7 @@ integration test calls HERE finds its credential set requested by 2.4 and stored
 
 ## Phase 8 — Verification harness
 
-- [ ] 8.1 Compatibility projects per intermediate target framework (`net8.0`,
+- [ ] 8.1 `Meta` — compatibility projects per intermediate target framework (`net8.0`,
       `net9.0`) referencing each published package, blocking on regression.
       Done when: a seeded API regression fails the project for each framework
 - [ ] 8.2 Emulator and simulator substrate for the matrix entries that need one; the
@@ -541,7 +571,8 @@ integration test calls HERE finds its credential set requested by 2.4 and stored
       the others so an unavailable runner blocks nothing else.
       Done when: a seeded divergence of one head from the canonical scenario fails that
       head's entry and no other
-- [ ] 8.4 `bUnit` on the Razor components, Playwright on the browser journeys.
+- [ ] 8.4 `bUnit` on the Razor components, in `Blazor`; Playwright on the browser
+      journeys, in `Meta`.
       Done when: a seeded regression fails each
 - [ ] 8.5 `Rinzler78.Templates` — upgrade merge check, a required check of the binding
       repositories, which keep the decision; `Meta` hosts the canonical scenario it

@@ -132,7 +132,9 @@ Two exceptions SHALL hold, and both are deliberate freezes rather than current
 values: the HERE SDK artefacts pinned per column, whose raise is a proposal by
 design, and the frozen Xamarin toolchain with its pinned Xcode. A version that is
 itself the decision belongs in the specification; a version that merely happens to
-be the latest does not.
+be the latest does not. Dated facts of a store's policy, target framework generations and
+the rationale quoted in `design.md` are not versions of a dependency, and the audit
+exempts them.
 
 #### Scenario: a routine bump does not touch the specification
 - **GIVEN** Renovate raises the assertion library by one minor version
