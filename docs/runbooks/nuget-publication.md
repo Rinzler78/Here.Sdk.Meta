@@ -82,7 +82,7 @@ The required checks are `verify` (build and tests) and `lint` (static quality), 
 of the harness's `ci.yml`. The domain reviewers `release-flow` also requires,
 `spec-reviewer` and `package-api-reviewer`, join them in the script when they exist;
 no task schedules them yet. A check the ruleset requires must exist: a repository without that
-workflow — `Here.Sdk.Meta` before it is generated from the template — would have every
+workflow — `Here.Sdk.Meta` before it carries the CI — would have every
 pull request blocked on checks that never run. Provision it once it carries the CI.
 
 **Why the environment is not optional.** A nuget.org policy matches the repository owner,

@@ -10,9 +10,11 @@ says how to see it done; a task without one is done when its sentence is true of
 repository. A task never depends on a later one: the order below is the execution
 order, and a dependency on something outside the repository's control — hardware, a
 portal, a store — is named in the task and never blocks the tasks that do not need it.
-Every task naming a repository also requires what the repository always requires:
-provisioning by 1.12, a declared coverage and trimming contract, a trimming test
-application for a `Committed` library, an ADR for each architectural choice, `README.md`, its DocFX site, and a green CI.
+The task that completes a repository's packages also requires what the repository
+always requires: provisioning by 1.12, a declared coverage and trimming contract, a
+trimming test application for a `Committed` library, an ADR for each architectural
+choice, `README.md`, its DocFX site, and a green CI. A demonstration that needs a HERE
+credential set requests it when its first sample starts; 2.4 does so for phase 2.
 
 ## Phase 0 — Archive and reset
 
@@ -31,7 +33,6 @@ application for a `Committed` library, an ADR for each architectural choice, `RE
 ## Phase 1 — Toolkit and cockpit
 
 - [x] 1.1 `Rinzler78.Toolkit` — harness written by hand, domain-agnostic
-      (skills: see 1.6a)
 - [x] 1.2 `Rinzler78.Build` — props/targets, domain-agnostic: named target
       framework sets, analysers, `TreatWarningsAsErrors`, deterministic build,
       `ContinuousIntegrationBuild` following the environment, SourceLink, `.snupkg`
@@ -40,8 +41,7 @@ application for a `Committed` library, an ADR for each architectural choice, `RE
       layer vocabulary and validation, forbidden dependencies, required analysers,
       required description fragment. A project declaring no policy builds
 - [x] 1.3 `Rinzler78.Templates` — `rinzler-lib`, `rinzler-binding`, `rinzler-app`,
-      each expanding: the seventeen skills in `.agents/skills/` and
-      `.claude/skills/`, `CLAUDE.md` and `AGENTS.md` with the agreement check,
+      each expanding: `CLAUDE.md` and `AGENTS.md` with the agreement check,
       `.claude/settings.json` with the `PreToolUse` / `PostToolUse` / `Stop` hooks,
       `.pre-commit-config.yaml` with the four blocking checks per language —
       vulnerability scan, dependency freshness, linter and formatter, and `cspell`
@@ -80,8 +80,8 @@ application for a `Committed` library, an ADR for each architectural choice, `RE
       `docs/runbooks/nuget-publication.md`
 - [ ] 1.6a Vendor the seventeen skills of `agent-harness` from their public upstream
       into `.agents/skills/` and `.claude/skills/` of `Rinzler78.Toolkit`, and into the
-      three templates through the shared harness directory (Toolkit issue #1). 1.1 and
-      1.3 were ticked while the skills were absent: both depend on this task.
+      three templates through the shared harness directory (Toolkit issue #1). The
+      boxes of 1.1 and 1.3 do not claim them.
       Done when: both skill directories hold the seventeen, byte-identical, and a
       regenerated repository carries them
 - [ ] 1.7 Release check for packages with no public API surface — the toolchain's
@@ -121,10 +121,15 @@ application for a `Committed` library, an ADR for each architectural choice, `RE
       `scripts/_provision-forge.sh`, and carried by the template.
       Done when: each fails a seeded violation in a scratch repository and passes the
       conforming one, and the script requires them alongside `verify` and `lint`
+- [ ] 1.11a `scripts/_provision-forge.sh` — the `copilot_code_review` rule, and an
+      idempotent verification mode that reads every setting back and reports drift
+      without changing anything. The script carries neither today.
+      Done when: the verification mode reports `Rinzler78.Toolkit` conforming after an
+      apply, and reports a seeded drift
 - [ ] 1.12 The repository provisioning procedure, one script or one runbook section:
       generate the repository from the right template, apply `_provision-forge.sh`
       (Copilot review included), register the nuget.org trusted-publishing policy
-      when it publishes, and add it to `Meta` as a submodule under `repos/<name>`
+      when it publishes — a portal step only you can take — and add it to `Meta` as a submodule under `repos/<name>`
       tracking `develop`. Every repository task below starts from it, so no repository
       is provisioned by hand and no task waits for the other seventeen.
       Done when: it has provisioned `Here.Sdk.Build` end to end, and a second run
@@ -171,12 +176,21 @@ application for a `Committed` library, an ADR for each architectural choice, `RE
       token, a fine-grained token, workflow dispatch from each repository.
       Done when: an ADR in `Meta` chooses one, names the permissions it holds and how
       long it lives, and `release-flow` states it
+- [ ] 1.20a `Rinzler78.Templates` — the release workflow notifies `Meta` by
+      `repository_dispatch` once it has published, with the identity chosen in 1.20.
+      The Toolkit and `Here.Sdk.Build` receive it through the template's regeneration.
+      Done when: a publication from a scratch repository raises the dispatch in a scratch
+      `Meta`, and the Toolkit's regenerated workflow carries the step
 - [ ] 1.21 `Meta` — NUKE orchestrator skeleton, with its unit tests where it holds
       logic.
       Done when: its target list runs locally and in CI and its unit tests pass
-- [ ] 1.22 `Meta` — the release cascade: receive the publishing repository's
-      dispatch, poll the flat-container index until the version is restorable, open the
-      next topological wave's bump pull requests (`Directory.Packages.props`, then
+- [ ] 1.22 `Meta` — the release cascade, receiving side: accept the publishing
+      repository's dispatch of 1.20a and poll the flat-container index until the
+      version is restorable.
+      Done when: a dispatch for a published `Rinzler78.Build` version is held until
+      nuget.org serves it, then released
+- [ ] 1.22a `Meta` — the release cascade, writing side: open the next topological
+      wave's bump pull requests (`Directory.Packages.props`, then
       `dotnet restore --force-evaluate`, then the regenerated lock file), and wait for
       green and for publication before the next wave.
       Done when: publishing a `Rinzler78.Build` patch from `Rinzler78.Toolkit` opens a
@@ -214,14 +228,18 @@ application for a `Committed` library, an ADR for each architectural choice, `RE
       independently on `js.api.here.com`, is absent from the examples repository and
       returns 404 on the npm registry.
       Done when: a recorded page fixture produces the expected issue in a dry run
-- [ ] 1.30 `Meta` — the **ecosystem audit**: catalogue containment, demonstration
-      coverage, task-box truth, ADR integrity and dead deny rules, harness drift,
-      and version literals in specifications — a requirement naming a concrete
-      version that is not one of the two declared freezes is reported. A check whose
-      subject does not exist yet reports not applicable, never a failure; equality
-      with the catalogue is asserted only once the realisation order is complete.
-      Done when: every check has a failing and a passing fixture, and the audit runs
+- [ ] 1.30 `Meta` — the **ecosystem audit**, first half: catalogue containment,
+      task-box truth, and forge settings read through the verification mode of 1.11a.
+      A check whose subject does not exist yet reports not applicable, never a
+      failure; equality with the catalogue is asserted only once the realisation order
+      is complete.
+      Done when: each check has a failing and a passing fixture, and the audit runs
       green on the repositories that exist
+- [ ] 1.30a `Meta` — the **ecosystem audit**, second half: demonstration coverage, ADR
+      integrity and dead deny rules, harness drift, and version literals in
+      specifications — a requirement naming a concrete version that is not one of the
+      two declared freezes is reported.
+      Done when: each check has a failing and a passing fixture
 
 ## Phase 2 — Native columns, standing alone
 
@@ -239,11 +257,12 @@ application for a `Committed` library, an ADR for each architectural choice, `RE
       verification and isolation rules as 2.1; a no-op when 2.2 keeps the hosted image.
       Done when: a canary job builds on it, or 2.2 records that none is needed
 - [ ] 2.4 Request one HERE credential set **per demonstration bundle identifier**, for
-      every mobile application of the demonstration table, and store each in the
-      owning repository's GitHub Actions secrets. Never share one across two
+      the mobile applications of this phase — `Bindings.iOS`, `Bindings.Android`,
+      `iOS` and `Android` — and store each in the owning repository's GitHub Actions
+      secrets. Never share one across two
       applications. A step only you can take, on the HERE portal.
-      Done when: every identifier of the table has a set, and none sits in a file
-- [ ] 2.5 Credential injection check for the mobile demonstrations: the application
+      Done when: every identifier of this phase has a set, and none sits in a file
+- [ ] 2.5 `Rinzler78.Templates` — credential injection check of `rinzler-app`, for the mobile demonstrations: the application
       binds its credential from configuration at start-up, caches it in
       `SecureStorage`, and CI fails when a literal remains in `AndroidManifest.xml` or
       `Info.plist`.
@@ -322,7 +341,8 @@ application for a `Committed` library, an ADR for each architectural choice, `RE
       API-coverage test; the integration-test project of 1.10
 - [ ] 6.2 Provision `HERE_JS_DEMO_APIKEY`, whitelisted to the Pages domain, and the
       check that the server-side key never reaches a Pages artefact. It precedes the
-      first sample, which needs the key.
+      first sample, which needs the key, and the key itself comes from the HERE portal,
+      a step only you can take.
       Done when: the check fails a seeded server-side key in a Pages artefact
 - [ ] 6.3 `Bindings.Js` — sample: Blazor WASM, raw `H.Map`, no pattern
 - [ ] 6.4 `Js` — idiomatic C# wrapper, referencing its binding only
@@ -372,7 +392,7 @@ application for a `Committed` library, an ADR for each architectural choice, `RE
 ## Phase 10 — Publication
 
 - [ ] 10.1 Publish stable in topological order, one repository at a time, driven by
-      the release cascade of 1.22, and verify a full propagation.
+      the release cascade of 1.22 and 1.22a, and verify a full propagation.
       Done when: every package of `package-topology` is restorable at its stable
       version, and the audit reports the ecosystem complete
 - [ ] 10.2 Make each repository public once the audit reports it conforming; `Meta`
