@@ -245,7 +245,7 @@ pushes the regenerated lock file. It SHALL serve both Renovate and the cascade.
 
 ### Requirement: The triage state machine is enforceable
 
-Thirteen labels SHALL exist identically in every repository, created at bootstrap:
+Fourteen labels SHALL exist identically in every repository, created at bootstrap:
 five triage states (`needs-triage`, `needs-info`, `ready-for-agent`,
 `ready-for-human`, `wontfix`), seven types aligned with Conventional Commits, and
 `breaking-change`, plus `blocked`.

@@ -62,7 +62,7 @@ bash scripts/_provision-forge.sh Rinzler78/<name>
 ```
 
 It applies, and re-applies without harm — except for the two items marked *pending*,
-which the script does not carry yet (tasks 1.11, 1.11a and 1.11b of `001-ecosystem-foundation`):
+which the script does not carry yet, with the domain reviewers (tasks 1.11, 1.11a and 1.11b of `001-ecosystem-foundation`):
 
 - a read-only default workflow token that cannot create or approve pull requests;
 - the `release` environment, admitting tags `v*` only — any other deployment policy is
@@ -155,7 +155,9 @@ window; a public repository's policy is active immediately.
    `git diff "${previous:-$(git hash-object -t tree /dev/null)}" origin/master -- '*PublicAPI.Unshipped.txt'`,
    against the empty tree before the first release. **1.0.0 after a 0.x version** is
    accepted only with an ADR of the repository declaring its public surface stable:
-   add that ADR's path to the message; without it the release check refuses 1.0.0.
+   add that ADR's path to the message; without it the release check refuses 1.0.0 —
+   *pending*: neither `_release-tag.sh` nor `release.yml` carries that check yet
+   (tasks 1.7 and 1.9).
 
    The push publishes, directly. There is no draft and no second gesture: the tag check,
    the immutable tags and the promotion pull request are what bound an irreversible push.
