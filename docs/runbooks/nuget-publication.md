@@ -61,8 +61,10 @@ moves only through promotion pull requests from `develop`, merged with a merge c
 bash scripts/_provision-forge.sh Rinzler78/<name>
 ```
 
-It applies, and re-applies without harm — except for the two items marked *pending*,
-which the script does not carry yet, with the domain reviewers (tasks 1.11, 1.11a and 1.11b of `001-ecosystem-foundation`):
+It applies, and re-applies without harm — except for the items marked *pending*,
+which the script or the release workflow does not carry yet — the Copilot rule (task
+1.11a), `promotion-source` (1.11b), the domain reviewers (1.11) and the release
+checks of the tag (1.7 and 1.9), all of `001-ecosystem-foundation`:
 
 - a read-only default workflow token that cannot create or approve pull requests;
 - the `release` environment, admitting tags `v*` only — any other deployment policy is

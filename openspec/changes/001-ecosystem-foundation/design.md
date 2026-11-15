@@ -275,7 +275,7 @@ survives this project.
 | NUnit for the user interface suite | Inherited from the Appium documentation. The client is framework-agnostic, and a second framework for one medium is a second thing to keep aligned. |
 | A central upgrade proposal in `Meta` | Makes eighteen repositories depend on the cockpit for a decision that is theirs. Repositories are autonomous; the package and its version are the protocol. |
 | Scraping the HERE release notes | The documentation site is a single-page application whose Android and iOS release-note URLs return byte-identical documents. The examples repository publishes dated releases through the GitHub API instead. |
-| Shipping `PublicAPI.Shipped.txt` inside the package for consumers to assert against | Duplicates what the compiler already does, and adds twenty-eight downstream baselines to keep true. A duplicated baseline eventually lies. |
+| Shipping `PublicAPI.Shipped.txt` inside the package for consumers to assert against | Duplicates what the compiler already does, and adds one downstream baseline per package to keep true. A duplicated baseline eventually lies. |
 | FluentAssertions 8 and later | Ships the Xceed Community License Agreement, restricted to non-commercial use, on an ecosystem whose purpose is to win commercial work. The Apache-2.0 fork keeps the API without the question. |
 | Integration tests sharing the unit test project | Would make diff coverage depend on whether a credential is configured, so the same commit passes or fails by environment. |
 | An integration test mechanism in all nineteen repositories | Empty ceremony in the fourteen that reach no network, and a mechanism useful nowhere stops being verified. |

@@ -110,7 +110,7 @@ SHALL NOT live in the agnostic package: a toolkit published under a personal pre
 cannot impose a third party's commercial notice on consumers who have nothing to do
 with that third party.
 
-Publishing twenty-nine packages named `Here.Sdk.*` without that statement is a
+Publishing twenty-seven packages named `Here.Sdk.*` without that statement is a
 trademark and expectation risk, not a formality.
 
 #### Scenario: the disclaimer travels with the package

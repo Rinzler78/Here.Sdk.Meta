@@ -247,7 +247,7 @@ pushes the regenerated lock file. It SHALL serve both Renovate and the cascade.
 
 Fourteen labels SHALL exist identically in every repository, created at bootstrap:
 five triage states (`needs-triage`, `needs-info`, `ready-for-agent`,
-`ready-for-human`, `wontfix`), seven types aligned with Conventional Commits, and
+`ready-for-human`, `wontfix`), seven types aligned with Conventional Commits (`feat`, `fix`, `perf`, `docs`, `chore`, `refactor`, `test`), and
 `breaking-change`, plus `blocked`.
 
 A workflow SHALL refuse `ready-for-agent` on an issue that does not carry exactly

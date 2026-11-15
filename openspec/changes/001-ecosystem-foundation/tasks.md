@@ -17,7 +17,7 @@ it, an ADR for each architectural choice, and a green CI. A repository that carr
 assembly also requires a declared coverage and trimming contract, a trimming test
 application for a `Committed` library, and its DocFX site. A task whose sample or
 integration test calls HERE finds its credential set requested by 2.4 and stored by
-1.12; the JavaScript key is the exception, requested by 6.2 before its first use.
+1.12; the JavaScript key is the exception, requested by 6.1 before its first use.
 
 ## Phase 0 — Archive and reset
 
@@ -108,7 +108,8 @@ integration test calls HERE finds its credential set requested by 2.4 and stored
       a per-repository gate: wiring it after the repositories exist would reopen every
       one of them.
       Done when: a regenerated repository runs both modes and a surviving mutant under
-      the threshold fails its pull request
+      the threshold fails its pull request; the mutation badge, and the rule that the
+      diff score never regresses, fail a lowered score on its pull request
 - [ ] 1.8a Reconcile the trimming vocabulary: `quality` names `Committed`, `Analyzed`
       and `OutOfScope`, while `Rinzler78.Build` validates `OutOfScope`, `Trimmable` and
       `AotCompatible`. One of the two changes, by an ADR in `Meta`.
@@ -123,18 +124,22 @@ integration test calls HERE finds its credential set requested by 2.4 and stored
       fail their pull request
 - [ ] 1.8c `Rinzler78.Templates` — the `Committed` trimming measurement written to the
       `README.md`, and the full gate on a pull request into `master`: AOT, measured
-      sizes posted on the pull request; the release optimisations (R8, AOT, LLVM) belong
-      to the release workflow only; the mutation badge and the rule that the diff score
-      never regresses.
-      Done when: a scratch `Committed` library posts its sizes, a size regression
-      fails the promotion pull request, and a lowered diff score fails its pull request
+      sizes posted on the pull request.
+      Done when: a scratch `Committed` library posts its sizes, and a size regression
+      fails the promotion pull request
+- [ ] 1.8d `Rinzler78.Templates` and `Rinzler78.Build` — the Release and Debug
+      optimisation properties of `toolchain`: Debug unoptimised with full symbols,
+      Release with every optimisation the project supports (R8, AOT, LLVM, WASM AOT,
+      Brotli), the costly ones only in the release workflow, and `AndroidFastDeploymentType`.
+      Done when: a scratch project's Debug build is unoptimised, its Release build
+      enables them, and a feature-branch build skips the costly ones
 - [ ] 1.9 `Rinzler78.Templates` — release check asserting the published version matches
       the `PublicAPI.Unshipped.txt` diff — an empty diff a patch, an additive diff a
       minor, a removed or reshaped member a major, or a minor before 1.0.0, whatever
       the commit prefix says — with one exception: 1.0.0 after a 0.x version is
       accepted when, and only when, the ADR declaring the public surface stable
-      exists, whatever the diff; and the annotated tag's message carrying the evidence
-      the proposal cited.
+      exists, whatever the diff. The tag-message evidence and the 1.0.0 exception are the
+      rules of 1.7, which this check consumes rather than repeats.
       Done when: a scratch library with a public API refuses the three wrong
       outcomes, and the check precedes the first prerelease of any package
 - [ ] 1.10 `Rinzler78.Templates` — an opt-in integration-test project,
@@ -149,17 +154,17 @@ integration test calls HERE finds its credential set requested by 2.4 and stored
       Done when: a regenerated repository with an assembly builds its site, and a
       member without documentation fails with `CS1591`
 - [ ] 1.10b `Rinzler78.Templates` — the three issue forms (bug, feature, chore; the
-      template ships two), and the triage workflows: `ready-for-agent` refused without
-      exactly one type, `breaking-change` requiring `!` and a migration section, and a
-      `feat` issue with no linked OpenSpec change losing `ready-for-agent`. The labels
-      are the fourteen `release-flow` enumerates — five triage states, the seven types
-      it lists, `breaking-change` and `blocked` — so the template's `bug` and
-      `feature` are renamed. The extras the template holds, `docs`, `dependencies` and
-      `security`, are removed unless the spec is amended to list them in this same pull
-      request; the freshness check of the toolchain relies on `dependencies`, which
-      decides it. The forms ask for the target framework and the linked proposal.
-      Done when: each refusal is demonstrated on a scratch pull request, and the label
-      file holds exactly the labels the spec enumerates
+      template ships two), asking for the target framework and the linked proposal, and
+      the label file: the fourteen `release-flow` enumerates — five triage states, the
+      seven types `feat`, `fix`, `perf`, `docs`, `chore`, `refactor` and `test`,
+      `breaking-change` and `blocked`. The template's `bug` and `feature` are renamed,
+      and its extras `dependencies` and `security` are removed.
+      Done when: the label file holds exactly those fourteen, and each form applies one
+      of them
+- [ ] 1.10m `Rinzler78.Templates` — the triage workflows: `ready-for-agent` refused
+      without exactly one type, `breaking-change` requiring `!` and a migration section,
+      and a `feat` issue with no linked OpenSpec change losing `ready-for-agent`.
+      Done when: each refusal is demonstrated on a scratch pull request
 - [ ] 1.10c `Rinzler78.Templates` — credential-shaped strings: a pre-commit hook and a
       CI check that fail on one, and a packaging check that fails on a credential-shaped
       constant in a package.
@@ -188,7 +193,8 @@ integration test calls HERE finds its credential set requested by 2.4 and stored
       Done when: a scratch repository fails CI on an invalid change, and the refresh
       command produces a reviewable commit
 - [ ] 1.10h `Rinzler78.Templates` — `renovate.json`, so the freshness check measures
-      real bump pull requests. The Renovate application is installed per repository by
+      real bump pull requests; the check identifies them by their author
+      `renovate[bot]`, not by a label, since `dependencies` is not one of the fourteen. The Renovate application is installed per repository by
       1.12, a portal step.
       Done when: a regenerated repository's Renovate configuration validates
 - [ ] 1.10i `Rinzler78.Templates` — a suppression without a written justification fails
@@ -212,7 +218,8 @@ integration test calls HERE finds its credential set requested by 2.4 and stored
 - [ ] 1.11a `scripts/_provision-forge.sh` — the `copilot_code_review` rule, and an
       idempotent verification mode that reads every setting back and reports drift
       without changing anything. The script carries neither today.
-      GitHub Pages is enabled with Actions as its source.
+      The labels of 1.10b are created from the label file, and GitHub Pages is enabled
+      with Actions as its source; the verification mode reads both back.
       Done when: on a scratch repository the verification mode reports conforming after
       an apply, and reports a seeded drift; the Toolkit is applied only by 1.11f
 - [ ] 1.11b `Rinzler78.Templates` and `scripts/_provision-forge.sh` — `promotion.yml`,
@@ -262,12 +269,13 @@ integration test calls HERE finds its credential set requested by 2.4 and stored
       store the cascade identity of 1.11c and the HERE credential sets that exist when it
       runs (2.4 requests them) and belong to it as secrets — portal steps for the Renovate application installation and
       for giving the cascade identity write access to the repository — wire
-      `Here.Sdk.Build` into every `Here.Sdk.*` repository but itself, and add it to `Meta` as a
+      `Here.Sdk.Build` into every generated `Here.Sdk.*` repository but itself, and add it to `Meta` as a
       submodule under `repos/<name>` tracking `develop`. Visibility follows
       `ecosystem-architecture`: the toolchain repositories are public from creation, the
       others private until extraction is complete; a policy on a private repository is
       pending, and lapses after seven days if nothing is published, so it is registered
-      at the first `alpha.N`. Every repository task below starts from it, so no
+      at the first `alpha.N`. A plan supporting rulesets and Pages on private repositories is a prerequisite. Every
+      repository task below starts from it, so no
       repository is provisioned by hand and no task waits for the others.
       Done when: it has provisioned `Here.Sdk.Build` end to end and a private,
       non-publishing scratch repository, and a second run changes nothing
@@ -292,7 +300,8 @@ integration test calls HERE finds its credential set requested by 2.4 and stored
       Done when: the request is filed and its date recorded in the runbook
 - [ ] 1.16 `Meta` — brought to the template's conformance. This repository exists
       already, with its history; it is not generated again. Add the harness files it
-      lacks, the CI whose `verify` and `lint` checks the rulesets require, and the
+      lacks, the CI whose `verify`, `lint`, `spec-reviewer` and `package-api-reviewer` checks the
+      rulesets require, and the
       `promotion.yml` of 1.11b on `master` before `promotion-source` is required:
       without it no pull request into `master` can merge.
       The cascade identity of 1.11c is stored in `Meta` as a secret.
@@ -381,7 +390,10 @@ integration test calls HERE finds its credential set requested by 2.4 and stored
 - [ ] 1.30a `Meta` — the **ecosystem audit**, second half: demonstration coverage, ADR
       integrity and dead deny rules, harness drift, and version literals in
       specifications — a requirement naming a concrete version that is not one of the
-      two declared freezes is reported; the layer assignment of each package; and the deliberate absence of `CODEOWNERS`.
+      two declared freezes is reported, dated store facts, target framework generations and
+      rationale quoted in `design.md` being the exempt class, written in the audit's
+      configuration; the layer assignment of each package; that no repository holds a
+      registry key; and the deliberate absence of `CODEOWNERS`.
       Done when: each check has a failing and a passing fixture
 
 ## Phase 2 — Native columns, standing alone
@@ -408,6 +420,7 @@ integration test calls HERE finds its credential set requested by 2.4 and stored
       tests. The sets are held outside any repository; the task provisioning a
       repository, through 1.12, stores its own in that repository's GitHub Actions
       secrets.
+      Each set's name and rotation date go into the metadata file read by 1.27.
       Done when: every identifier of the table and every server-side key has a set
       recorded by name, and none sits in a file
 - [ ] 2.5 `Bindings.iOS` — pinned `.xcframework` version, and the Objective Sharpie
@@ -483,7 +496,8 @@ integration test calls HERE finds its credential set requested by 2.4 and stored
 
 - [ ] 6.1 Provision `HERE_JS_DEMO_APIKEY`, whitelisted to the Pages domain, and the
       check that the server-side key never reaches a Pages artefact. It precedes `Bindings.Js`, whose
-      integration tests and sample need the key, and the key itself comes from the HERE portal,
+      sample needs the key; its integration tests use the server-side key of 2.4, never
+      this one, and the key itself comes from the HERE portal,
       a step only you can take.
       Done when: the check fails a seeded server-side key in a Pages artefact
 - [ ] 6.2 `Bindings.Js` — pinned Maps API for JavaScript version, C# interop, and its
@@ -519,15 +533,20 @@ integration test calls HERE finds its credential set requested by 2.4 and stored
       cannot run without it.
       Done when: a canary application starts on each substrate
 - [ ] 8.3 One parameterised user interface suite, housed in `Meta` and driving each
-      application's published artefact, never a `ProjectReference` — a single `net10.0`
+      application's CI-built artefact, never a `ProjectReference` — a single `net10.0`
       xUnit
       project holding the canonical scenario once behind a driver abstraction, with
       an Appium adapter for the Apple and Android heads and a FlaUI adapter for the
       Windows heads — executed once per head by a matrix, Xamarin included, the Xamarin entries disjoint from
-      the others so an unavailable runner blocks nothing else
+      the others so an unavailable runner blocks nothing else.
+      Done when: a seeded divergence of one head from the canonical scenario fails that
+      head's entry and no other
 - [ ] 8.4 `bUnit` on the Razor components, Playwright on the browser journeys.
       Done when: a seeded regression fails each
-- [ ] 8.5 `Meta` — upgrade merge check: a proposal raising a pinned HERE artefact does not
+- [ ] 8.5 `Rinzler78.Templates` — upgrade merge check, a required check of the binding
+      repositories, which keep the decision; `Meta` hosts the canonical scenario it
+      runs, and the template version is published and regenerated into each binding
+      repository by pull request: a proposal raising a pinned HERE artefact does not
       merge on an empty surface diff alone — the integration suite and the canonical
       scenario have both run and are green.
       Done when: a proposal raising a pin with an empty diff does not merge until both are green
@@ -566,6 +585,6 @@ integration test calls HERE finds its credential set requested by 2.4 and stored
       Done when: each submission is filed and each artefact is attached to a release;
       a store's verdict is recorded when it arrives and never blocks this task
 - [ ] 10.4 Publish the gallery of every demonstration and the DocFX site of every
-      repository that carries code, each demonstration linked from the gallery.
+      repository publishing a package with an API surface, each demonstration linked from the gallery.
       Done when: every site and every demonstration answers on GitHub Pages
 - [ ] 10.5 Promote the deltas of this change into `openspec/specs/` and archive it
