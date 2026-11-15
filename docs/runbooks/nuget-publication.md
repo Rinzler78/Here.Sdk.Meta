@@ -61,7 +61,8 @@ moves only through promotion pull requests from `develop`, merged with a merge c
 bash scripts/_provision-forge.sh Rinzler78/<name>
 ```
 
-It applies, and re-applies without harm:
+It applies, and re-applies without harm — except for the two items marked *pending*,
+which the script does not carry yet (tasks 1.11a and 1.11b of `001-ecosystem-foundation`):
 
 - a read-only default workflow token that cannot create or approve pull requests;
 - the `release` environment, admitting tags `v*` only — any other deployment policy is
@@ -69,19 +70,19 @@ It applies, and re-applies without harm:
 - `develop`: pull request, squash only, linear history, signed, `verify` and `lint`
   required and bound to GitHub Actions;
 - `master`: pull request, merge commits only, signed, the same checks plus
-  `promotion-source` — `promotion.yml`, run from `master`'s own copy through
+  `promotion-source` (*pending*) — `promotion.yml`, run from `master`'s own copy through
   `pull_request_target`, refusing any source but this repository's `develop` — and no
   linear history, since a promotion keeps `develop`'s history. `master` must carry
   `promotion.yml` before the check is required, or no pull request into it can merge:
-  a generated repository has it from creation;
-- Copilot reviewing every push to a pull request into either branch;
+  a generated repository will have it from creation;
+- Copilot reviewing every push to a pull request into either branch (*pending*);
 - tags `v*`: neither updatable nor deletable by anyone, and created by administrators
   only — two rulesets, because a bypass applies to a whole ruleset.
 
 The required checks are `verify` (build and tests) and `lint` (static quality), the jobs
 of the harness's `ci.yml`. The domain reviewers `release-flow` also requires,
-`spec-reviewer` and `package-api-reviewer`, join them in the script when they exist;
-no task schedules them yet. A check the ruleset requires must exist: a repository without that
+`spec-reviewer` and `package-api-reviewer`, join them in the script when they exist
+(task 1.11 of `001-ecosystem-foundation`). A check the ruleset requires must exist: a repository without that
 workflow — `Here.Sdk.Meta` before it carries the CI — would have every
 pull request blocked on checks that never run. Provision it once it carries the CI.
 
