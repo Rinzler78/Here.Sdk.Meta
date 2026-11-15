@@ -16,8 +16,8 @@ repository's trusted-publishing policy so the repositories consuming it can refe
 it, an ADR for each architectural choice, and a green CI. A repository that carries an
 assembly also requires a declared coverage and trimming contract, a trimming test
 application for a `Committed` library, and its DocFX site. A task whose sample or
-integration test calls HERE requests its credential set first, on the HERE portal, a
-step only you can take; 2.4 does so for phase 2.
+integration test calls HERE finds its credential set requested by 2.4, and stores it
+in its repository.
 
 ## Phase 0 — Archive and reset
 
@@ -31,7 +31,7 @@ step only you can take; 2.4 does so for phase 2.
 - [x] 0.5 Empty the local `Here.Sdk.Meta` directory of everything except
       `openspec/changes/001-ecosystem-foundation/`, the seed of the new cockpit;
       remove `.git` and re-initialise. The four condemned proposals go with the rest.
-- [x] 0.6 Verify no `Rinzler78.*` or `Here.Sdk.*` identifier is taken on nuget.org
+- [x] 0.6 Verify no identifier of `package-topology` is taken by another owner on nuget.org
 
 ## Phase 1 — Toolkit and cockpit
 
@@ -43,7 +43,7 @@ step only you can take; 2.4 does so for phase 2.
       `<RinzlerCoverageContract>`, and the mechanisms the domain declares against —
       layer vocabulary and validation, forbidden dependencies, required analysers,
       required description fragment. A project declaring no policy builds
-- [x] 1.3 `Rinzler78.Templates` — `rinzler-lib`, `rinzler-binding`, `rinzler-app`,
+- [ ] 1.3 `Rinzler78.Templates` — `rinzler-lib`, `rinzler-binding`, `rinzler-app`,
       each expanding: `CLAUDE.md` and `AGENTS.md` with the agreement check,
       `.claude/settings.json` with the `PreToolUse` / `PostToolUse` / `Stop` hooks,
       `.pre-commit-config.yaml` with the four blocking checks per language —
@@ -66,6 +66,8 @@ step only you can take; 2.4 does so for phase 2.
       consumed as an **MSBuild project SDK**, pinned in `global.json`: a package
       reference cannot deliver a named target-framework set, because restore needs
       TargetFrameworks before the package's props exist
+      Done when: every item above exists in the templates and the Toolkit regenerates them
+      byte-identically. The items still missing are produced by 1.6a, 1.10a to 1.10g.
 - [x] 1.4 Regenerate the Toolkit harness from its own template; assert byte identity
       for every harness file, and presence only for the files the template declares
       as seeds — the README, the entry points, the solution, the central versions,
@@ -99,11 +101,28 @@ step only you can take; 2.4 does so for phase 2.
       the right one, and the check runs in the release workflow before the credential
       is requested
 - [ ] 1.8 `Rinzler78.Templates` — Stryker wired to the diff on every pull request and
-      in full nightly, break threshold 70 %, target 85 %, absent from a repository
-      declaring no assembly. Mutation is a per-repository gate: wiring it after the
-      repositories exist would reopen every one of them.
+      in full nightly on the portable libraries, break threshold 70 %, target 85 %. A
+      project declaring `RinzlerCoverageContract` Exempt, the bindings included, is not
+      mutated, and a repository without an assembly carries no mutation job. Mutation is
+      a per-repository gate: wiring it after the repositories exist would reopen every
+      one of them.
       Done when: a regenerated repository runs both modes and a surviving mutant under
       the threshold fails its pull request
+- [ ] 1.8a Reconcile the trimming vocabulary: `quality` names `Committed`, `Analyzed`
+      and `OutOfScope`, while `Rinzler78.Build` validates `OutOfScope`, `Trimmable` and
+      `AotCompatible`. One of the two changes, by an ADR in `Meta`.
+      Done when: spec and `Rinzler78.Build` use the same three values, and a project
+      declaring any other fails the build
+- [ ] 1.8b `Rinzler78.Templates` — the coverage gate: the floor per project, the diff
+      coverage on a pull request, and a failure for a Reduced or Exempt contract without
+      an ADR.
+      Done when: a scratch project under the floor, and one Exempt without an ADR, each
+      fail their pull request
+- [ ] 1.8c `Rinzler78.Templates` — the `Committed` trimming measurement written to the
+      `README.md`, and the full gate on a pull request into `master`: AOT, measured
+      sizes posted on the pull request.
+      Done when: a scratch `Committed` library posts its sizes, and a size regression
+      fails the promotion pull request
 - [ ] 1.9 `Rinzler78.Templates` — release check asserting the published version matches
       the `PublicAPI.Unshipped.txt` diff — an empty diff a patch, an additive diff a
       minor, a removed or reshaped member a major, or a minor before 1.0.0, whatever
@@ -127,7 +146,9 @@ step only you can take; 2.4 does so for phase 2.
       member without documentation fails with `CS1591`
 - [ ] 1.10b `Rinzler78.Templates` — the three issue forms (bug, feature, chore; the
       template ships two), and the triage workflows: `ready-for-agent` refused without
-      exactly one type, `breaking-change` requiring `!` and a migration section.
+      exactly one type, `breaking-change` requiring `!` and a migration section, and a
+      `feat` issue with no linked OpenSpec change losing `ready-for-agent`. The labels
+      are defined once, and the bug form applies the label `release-flow` names.
       Done when: each refusal is demonstrated on a scratch pull request
 - [ ] 1.10c `Rinzler78.Templates` — credential-shaped strings: a pre-commit hook and a
       CI check that fail on one, and a packaging check that fails on a credential-shaped
@@ -136,6 +157,22 @@ step only you can take; 2.4 does so for phase 2.
       the packaging check, each naming the file and line
 - [ ] 1.10d `Rinzler78.Templates` — the test-first status check of `coding-principles`.
       Done when: a scratch pull request with code before its failing test is refused
+- [ ] 1.10e `Rinzler78.Templates` — credential injection check of `rinzler-app`, for
+      the mobile demonstrations: the application binds its credential from configuration
+      at start-up, caches it in `SecureStorage`, and CI fails when a literal remains in
+      `AndroidManifest.xml` or `Info.plist`.
+      Done when: the check fails a seeded literal in each of the two files
+- [ ] 1.10f `Rinzler78.Templates` and the Toolkit — the harness `agent-harness`
+      requires and 1.3 claimed: `WORKFLOW.md`, the `PreToolUse`, `PostToolUse` and
+      `Stop` hooks, the guard refusing edits while `develop` or `master` is checked
+      out, a credential detector before a write, and the agent and command directories.
+      Done when: each hook refuses its seeded case, and the Toolkit regenerates all of
+      it byte-identically
+- [ ] 1.10g `Rinzler78.Templates` — `openspec validate --strict` in CI and the seed
+      `openspec/` tree, the `to-spec` configuration, and the command refreshing the
+      vendored skills from upstream and committing the result.
+      Done when: a scratch repository fails CI on an invalid change, and the refresh
+      command produces a reviewable commit
 - [ ] 1.11 The domain reviewers `release-flow` requires, `spec-reviewer` and
       `package-api-reviewer`: written, joined to the required checks in
       `scripts/_provision-forge.sh`, and carried by the template.
@@ -153,16 +190,36 @@ step only you can take; 2.4 does so for phase 2.
       although the runbook describes them as applied.
       Done when: a promotion pull request from `develop` is accepted and one from any
       other branch is refused, on a scratch repository
-- [ ] 1.11c Publish a version of `Rinzler78.Templates` carrying 1.7 to 1.11b, then
-      regenerate `Rinzler78.Toolkit` from it and apply the script again, so the
-      Toolkit carries the checks its own rulesets will require.
-      Done when: the Toolkit's pull request for the regeneration is green and merged,
-      and the published version is the one 1.12 consumes
+- [ ] 1.11c Decision: the identity the cascade writes with across repositories. No
+      repository's `GITHUB_TOKEN` can reach another, and `release-flow` records that
+      the identity "is not yet specified". Candidates: a GitHub App installation
+      token, a fine-grained token, workflow dispatch from each repository.
+      Creating and installing the identity is a portal step only you can take.
+      Done when: an ADR in `Meta` (`ADR-M`) chooses one, names the permissions it holds
+      and how long it lives, `release-flow` states it, and the identity exists
+- [ ] 1.11d `Rinzler78.Templates` — the release workflow notifies `Meta` by
+      `repository_dispatch` once it has published, with the identity of 1.11c.
+      Done when: a publication from a scratch repository raises the dispatch in a scratch
+      `Meta`
+- [ ] 1.11e `Rinzler78.Templates` — `lockfile-sync` serves the cascade as well as
+      Renovate: it fires for the cascade's actor and for `global.json`, where the
+      `Rinzler78.Build` SDK is pinned, besides `Directory.Packages.props`. Today it
+      fires only for `renovate[bot]` on `Directory.Packages.props`.
+      Done when: a bump pull request from the cascade's actor on either file gets its
+      lock file regenerated, in a scratch repository
+- [ ] 1.11f Publish a version of `Rinzler78.Templates` carrying 1.7 to 1.11e, then
+      regenerate `Rinzler78.Toolkit` from it. The order matters: the regeneration pull
+      request merges into `develop`, a promotion pull request carries `promotion.yml`
+      into `master`, and only then is `_provision-forge.sh` applied again, since the
+      script requires `promotion-source` and the reviewer checks, which the Toolkit's
+      own workflows must carry first. The identity of 1.11c is stored in the Toolkit.
+      Done when: the script's verification mode reports the Toolkit conforming, and its
+      release workflow carries the dispatch step
 - [ ] 1.12 The repository provisioning procedure, one script or one runbook section:
-      generate the repository from the template version of 1.11c, apply
+      generate the repository from the latest published version of `Rinzler78.Templates`, apply
       `_provision-forge.sh` (Copilot review included), register the nuget.org
       trusted-publishing policy when it publishes — a portal step only you can take —
-      store the cascade identity of 1.20 as a secret, and add it to `Meta` as a
+      store the cascade identity of 1.11c as a secret, and add it to `Meta` as a
       submodule under `repos/<name>` tracking `develop`. Visibility follows
       `ecosystem-architecture`: the toolchain repositories are public from creation, the
       others private until extraction is complete; a policy on a private repository is
@@ -174,7 +231,9 @@ step only you can take; 2.4 does so for phase 2.
 - [ ] 1.13 `Here.Sdk.Build` — the domain specialisation: the layer vocabulary of the
       eight-layer map, the forbidden dependencies of the inward layers, the required
       analysers, and the HERE non-affiliation fragment, all declared through the
-      generic mechanism of `Rinzler78.Build`.
+      generic mechanism of `Rinzler78.Build`, with the rule that a wrapper holds exactly
+      one ecosystem package reference and no `ProjectReference` crosses a repository
+      boundary, and the `RinzlerLayer` template parameter.
       Done when: a scratch consumer violating the vocabulary, a forbidden dependency
       or the fragment cannot build, and a conforming one does; a props/targets package
       never imports itself, hence the scratch consumer
@@ -202,45 +261,29 @@ step only you can take; 2.4 does so for phase 2.
 - [ ] 1.18 `Meta` — founding ADRs: poly-repository rationale, public visibility,
       templates generated not synchronised, frozen Xamarin toolchain, deferred Linux
       desktop, self-hosted runner isolation, deliberate absence of `CODEOWNERS`.
-      Done when: each exists under `openspec/`, with context, decision and the
-      alternatives rejected; the frozen-toolchain one carries its dated market survey
+      Done when: each exists under `docs/architecture/decision-records/` as
+      `ADR-M-NNNN-*.md`, with context, decision and the alternatives rejected; the frozen-toolchain one carries its dated market survey
       and a written exit condition
-- [ ] 1.19 `Meta` — made public. It carries the specification and the plan, so it
-      opens before the repositories taking part in the extraction, which wait for 10.2;
-      the toolchain repositories were public from creation. The public-visibility ADR
-      of 1.18 says why.
-      Done when: a secret scan of the whole history is clean, then visibility is public
-- [ ] 1.20 Decision: the identity the cascade writes with across repositories. No
-      repository's `GITHUB_TOKEN` can reach another, and `release-flow` records that
-      the identity "is not yet specified". Candidates: a GitHub App installation
-      token, a fine-grained token, workflow dispatch from each repository.
-      Done when: an ADR in `Meta` chooses one, names the permissions it holds and how
-      long it lives, and `release-flow` states it. Creating and installing the identity
-      is a portal step only you can take; 1.12 stores it in each publisher
-- [ ] 1.20a `Rinzler78.Templates` — the release workflow notifies `Meta` by
-      `repository_dispatch` once it has published, with the identity chosen in 1.20.
-      Done when: a publication from a scratch repository raises the dispatch in a scratch
-      `Meta`
-- [ ] 1.20b `Rinzler78.Templates` — `lockfile-sync` serves the cascade as well as
-      Renovate: it fires for the cascade's actor and for `global.json`, where the
-      `Rinzler78.Build` SDK is pinned, besides `Directory.Packages.props`. Today it
-      fires only for `renovate[bot]` on `Directory.Packages.props`.
-      Done when: a bump pull request from the cascade's actor on either file gets its
-      lock file regenerated, in a scratch repository
-- [ ] 1.20c Publish a version of `Rinzler78.Templates` carrying 1.20a and 1.20b, then
-      regenerate `Rinzler78.Toolkit` and `Here.Sdk.Build` from it, one pull request each.
-      Done when: both pull requests are merged and both release workflows carry the
-      dispatch step
+- [ ] 1.19 `Meta` — public visibility confirmed: the repository is public already, and
+      carries the specification and the plan. The repositories taking part in the
+      extraction wait for 10.1; the toolchain repositories were public from creation.
+      The public-visibility ADR of 1.18 says why.
+      Done when: a secret scan of the whole history is clean and the ADR exists
+- [ ] 1.20 `Meta` — the catalogue: one machine-readable file of repositories,
+      packages, layers and dependency edges matching `package-topology`, with a schema
+      and a validation. The cascade, the gallery, the HERE detection and the audit all
+      read it, so it exists before them.
+      Done when: the validation passes, and the topological order is computed from it
 - [ ] 1.21 `Meta` — NUKE orchestrator skeleton, with its unit tests where it holds
       logic.
       Done when: its target list runs locally and in CI and its unit tests pass
 - [ ] 1.22 `Meta` — the release cascade, receiving side: accept the publishing
-      repository's dispatch of 1.20a and poll the flat-container index until the
+      repository's dispatch of 1.11d and poll the flat-container index until the
       version is restorable.
       Done when: a dispatch for a published `Rinzler78.Build` version is held until
       nuget.org serves it, then released
 - [ ] 1.22a `Meta` — the release cascade, writing side: open the next topological
-      wave's bump pull requests (`Directory.Packages.props`, and `global.json` for the
+      wave's bump pull requests, the wave read from the catalogue of 1.20 (`Directory.Packages.props`, and `global.json` for the
       `Rinzler78.Build` SDK pin, then `dotnet restore --force-evaluate`, then the
       regenerated lock file), and wait for
       green and for publication before the next wave.
@@ -255,8 +298,9 @@ step only you can take; 2.4 does so for phase 2.
       `git submodule update --remote`, then build the graph from sources with each
       repository against the others' `develop`. A repository not yet created is
       reported as absent, never as a failure.
+      A failure opens an issue and never blocks a pull request.
       Done when: the job runs green on the repositories that exist and its report
-      lists the absent ones
+      lists the absent ones, and a seeded break opens the issue
 - [ ] 1.25 `Meta` — aggregated board across repositories.
       Done when: it renders the task boxes and open issues of `Rinzler78.Toolkit` and
       `Here.Sdk.Build`, published to GitHub Pages
@@ -284,59 +328,61 @@ step only you can take; 2.4 does so for phase 2.
       A check whose subject does not exist yet reports not applicable, never a
       failure; equality with the catalogue is asserted only once the realisation order
       is complete.
+      The audit runs nightly, never blocks a pull request, and reports into issues.
       Done when: each check has a failing and a passing fixture, and the audit runs
       green on the repositories that exist
 - [ ] 1.30a `Meta` — the **ecosystem audit**, second half: demonstration coverage, ADR
       integrity and dead deny rules, harness drift, and version literals in
       specifications — a requirement naming a concrete version that is not one of the
-      two declared freezes is reported.
+      two declared freezes is reported; and the deliberate absence of `CODEOWNERS`.
       Done when: each check has a failing and a passing fixture
 
 ## Phase 2 — Native columns, standing alone
 
 - [ ] 2.1 Self-hosted macOS runner: Xcode 15.4 pinned, ephemeral, dedicated account
       with no keychain access, version verification job, fork-exclusion condition,
-      `pull_request_target` ban check, exempting `promotion.yml` — **before any Xamarin build**. It needs a Mac
+      `pull_request_target` ban check, held by the template's CI and exempting
+      `promotion.yml` — **before any Xamarin build**. It needs a Mac
       able to run the pinned Xcode, a prerequisite of hardware only you can supply.
       Done when: the verification job reports the pinned version, fails when it moves,
-      and a canary job runs on the runner
+      a seeded `pull_request_target` workflow fails the ban check, and a canary job runs
+      on the runner
 - [ ] 2.2 Decision: the runner of the Xamarin.Android chain. The earlier wording,
       "`windows-2022` while it lives", names no date.
-      Done when: an ADR in `Meta` chooses a self-hosted Windows runner or the hosted
+      Done when: an ADR in `Meta` (`ADR-M`) chooses a self-hosted Windows runner or the hosted
       image, and dates the last day the hosted image can serve
 - [ ] 2.3 The Windows runner of the Xamarin.Android chain, per 2.2, with the same
       verification and isolation rules as 2.1; a no-op when 2.2 keeps the hosted image.
       Done when: a canary job builds on it, or 2.2 records that none is needed
-- [ ] 2.4 Provision the four repositories of this phase with 1.12, then request one HERE credential set **per demonstration bundle identifier**, for
-      the mobile applications of this phase — `Bindings.iOS`, `Bindings.Android`,
-      `iOS` and `Android` — and store each in the owning repository's GitHub Actions
-      secrets. Never share one across two
-      applications. A step only you can take, on the HERE portal.
-      Done when: every identifier of this phase has a set, and none sits in a file
-- [ ] 2.5 `Rinzler78.Templates` — credential injection check of `rinzler-app`, for the mobile demonstrations: the application
-      binds its credential from configuration at start-up, caches it in
-      `SecureStorage`, and CI fails when a literal remains in `AndroidManifest.xml` or
-      `Info.plist`.
-      Done when: the check fails a seeded literal in each of the two files
-- [ ] 2.6 `Bindings.iOS` — pinned `.xcframework` version, and the Objective Sharpie
+- [ ] 2.4 Request the HERE credentials of the whole ecosystem, on the HERE portal, a
+      step only you can take: one set **per demonstration bundle identifier** for every
+      mobile application of the demonstration table — `iOS` and `Android` hold two
+      applications each, so two sets each, and none is shared — and the server-side
+      key for the `Core`, `Rest` and `Navigation` demonstrations and the integration
+      tests. The sets are held outside any repository; the task provisioning a
+      repository, through 1.12, stores its own in that repository's GitHub Actions
+      secrets.
+      Done when: every identifier of the table and every server-side key has a set
+      recorded by name, and none sits in a file
+- [ ] 2.5 `Bindings.iOS` — pinned `.xcframework` version, and the Objective Sharpie
       output, `ApiDefinition.cs` and `StructsAndEnums.cs`, committed as the upstream
       baseline, so a version raise is a plain `git diff` before any hand binding
-- [ ] 2.7 `Bindings.iOS` — C# projection, and the API-coverage test reflecting over the
+- [ ] 2.6 `Bindings.iOS` — C# projection, and the API-coverage test reflecting over the
       bound assembly with its justified exclusion list; the integration-test project
       of 1.10
-- [ ] 2.8 `Bindings.iOS` — sample: .NET 10 iOS, raw surface, no pattern
-- [ ] 2.9 `Bindings.Android` — pinned AAR version, and the generator's `api.xml`
+- [ ] 2.7 `Bindings.iOS` — sample: .NET 10 iOS, raw surface, no pattern
+- [ ] 2.8 `Bindings.Android` — pinned AAR version, and the generator's `api.xml`
       committed as the upstream baseline; it is an intermediate artefact and is
       discarded unless committed deliberately
-- [ ] 2.10 `Bindings.Android` — C# projection, and its API-coverage test; the
+- [ ] 2.9 `Bindings.Android` — C# projection, and its API-coverage test; the
       integration-test project of 1.10
-- [ ] 2.11 `Bindings.Android` — sample: .NET 10 Android, raw surface, no pattern
-- [ ] 2.12 `iOS` — idiomatic wrapper, referencing its binding only
-- [ ] 2.13 `iOS` — samples: Xamarin.iOS in MVC Cocoa, .NET 10 iOS in MVVM-C, each
+- [ ] 2.10 `Bindings.Android` — sample: .NET 10 Android, raw surface, no pattern
+- [ ] 2.11 `iOS` — idiomatic wrapper, referencing its binding only
+- [ ] 2.12 `iOS` — samples: Xamarin.iOS in MVC Cocoa, .NET 10 iOS in MVVM-C, each
       written by hand in its pattern, with the ADR of the owning repository that
       justifies it
-- [ ] 2.14 `Android` — idiomatic wrapper, referencing its binding only
-- [ ] 2.15 `Android` — samples: Xamarin.Android in MVP, .NET 10 Android in MVVM/UDF,
+- [ ] 2.13 `Android` — idiomatic wrapper, referencing its binding only
+- [ ] 2.14 `Android` — samples: Xamarin.Android in MVP, .NET 10 Android in MVVM/UDF,
       each written by hand in its pattern, with `ADR-0001` explaining why Google's
       MVVM guidance does not apply to .NET Android
 
@@ -345,7 +391,7 @@ step only you can take; 2.4 does so for phase 2.
 - [ ] 3.1 Throwaway spike on the HERE Maps API for JavaScript. The code is discarded and
       committed nowhere; the capability matrix is the deliverable, and extraction
       cannot start without it.
-      Done when: the matrix is recorded as an ADR in `Meta`
+      Done when: the matrix is recorded as an ADR in `Meta` (`ADR-M`)
 - [ ] 3.2 `Common` — extracted: value objects validating at construction
 - [ ] 3.3 `Common` — sample: Blazor WASM page, no HERE key required
 - [ ] 3.4 `Abstractions` — extracted from the two native wrappers and the capability
@@ -366,7 +412,7 @@ step only you can take; 2.4 does so for phase 2.
 
 ## Phase 5 — Portable implementations
 
-- [ ] 5.1 `Rest` — Geocoding & Search v7, Routing v8, Traffic v7, Raster Tile v3; the
+- [ ] 5.1 `Rest` — the geocoding and search, routing, traffic and raster tile services; the
       integration-test project of 1.10
 - [ ] 5.2 `Rest` — sample: Blazor Server
 - [ ] 5.3 `Navigation` — REST guidance engine: progress along the polyline, manoeuvre
@@ -426,7 +472,8 @@ step only you can take; 2.4 does so for phase 2.
 - [ ] 8.3 One parameterised user interface suite — a single `net10.0` xUnit v3
       project holding the canonical scenario once behind a driver abstraction, with
       an Appium adapter for the Apple and Android heads and a FlaUI adapter for the
-      Windows heads — executed once per head by a matrix, Xamarin included
+      Windows heads — executed once per head by a matrix, Xamarin included, the Xamarin entries disjoint from
+      the others so an unavailable runner blocks nothing else
 - [ ] 8.4 `bUnit` on the Razor components, Playwright on the browser journeys
 - [ ] 8.5 Upgrade merge check: a proposal raising a pinned HERE artefact does not
       merge on an empty surface diff alone — the integration suite and the canonical
@@ -437,24 +484,30 @@ step only you can take; 2.4 does so for phase 2.
 - [ ] 9.1 Android keystore and Apple certificate, private key and provisioning
       profiles into GitHub Actions secrets; temporary keychain created and destroyed
       per job, nothing written to the workspace.
+      The Apple developer account and the Google Play account are prerequisites only you
+      can supply.
       Done when: a canary job signs a dummy artefact and leaves no file in the workspace
 - [ ] 9.2 Verify the dedicated runner account of 2.1 holds no signing material in its
       login keychain
 
 ## Phase 10 — Publication
 
-- [ ] 10.1 Publish stable in topological order, one repository at a time, driven by
+- [ ] 10.1 Make each repository taking part in the extraction public, in topological
+      order, once the audit reports it conforming; `Meta` and the toolchain
+      repositories are public already. A package whose repository is private sends its
+      consumers to a 404, so visibility precedes the stable publication.
+      Done when: no repository remains private
+- [ ] 10.2 Publish stable in topological order, one repository at a time, driven by
       the release cascade of 1.22 and 1.22a, and verify a full propagation.
       Done when: every package of `package-topology` is restorable at its stable
       version, and the audit reports the ecosystem complete
-- [ ] 10.2 Make each repository taking part in the extraction public once the audit
-      reports it conforming; `Meta` and the toolchain repositories are public already.
-      Done when: no repository remains private
 - [ ] 10.3 Store submissions for the .NET and MAUI heads; **release artifacts only
       for both Xamarin heads**, each `README.md` naming its dated cause.
       The .NET and MAUI heads go through TestFlight and Play internal testing; the
       Xamarin heads ship signed ad-hoc artefacts, and a check fails any workflow with a
       Xamarin store upload step.
+      Each application also gets a GitHub Release artefact workflow. The store consoles
+      are steps only you can take.
       Done when: each submission is filed and each artefact is attached to a release;
       a store's verdict is recorded when it arrives and never blocks this task
 - [ ] 10.4 Publish the gallery of every demonstration and the DocFX site of every

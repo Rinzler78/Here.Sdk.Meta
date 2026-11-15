@@ -25,7 +25,7 @@ A repository generated from `Rinzler78.Templates` arrives with:
 - `scripts/publish.sh` — refuses any package whose manifest does not declare
   `EXPECTED_VERSION`, the tag's version; the release workflow runs that check on its
   own, before it requests the credential;
-- `scripts/_provision-forge.sh` — every forge setting below, idempotent.
+- `scripts/_provision-forge.sh` — every forge setting below, except those marked *pending*, idempotent.
 
 Nothing in the tree needs editing. Everything below lives outside it.
 
@@ -62,7 +62,7 @@ bash scripts/_provision-forge.sh Rinzler78/<name>
 ```
 
 It applies, and re-applies without harm — except for the two items marked *pending*,
-which the script does not carry yet (tasks 1.11a and 1.11b of `001-ecosystem-foundation`):
+which the script does not carry yet (tasks 1.11, 1.11a and 1.11b of `001-ecosystem-foundation`):
 
 - a read-only default workflow token that cannot create or approve pull requests;
 - the `release` environment, admitting tags `v*` only — any other deployment policy is
