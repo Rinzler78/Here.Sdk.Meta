@@ -27,7 +27,7 @@ serve them is market proof.
 
 ## What changes
 
-- **18 repositories, 28 packages, 31 demonstration applications.** Applications
+- **19 repositories, 29 packages, 31 demonstration applications.** Applications
   outnumber packages because a package with several project systems — MAUI's four
   heads, Xamarin.Forms' two — is demonstrated once per head.
 - A generic engineering toolkit — `Rinzler78.Templates` and `Rinzler78.Build` —
