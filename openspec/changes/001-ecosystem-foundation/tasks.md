@@ -125,9 +125,18 @@ nuget.org from one. 1.11a and 1.12 also use a private one, to show the private c
       `IsAotCompatible` from `net7.0`, `Analyzed` running the trim analyser and marking
       nothing. Delivered by `Rinzler78.Toolkit` pull request #22.
       A change in `Rinzler78.Build` is published by 1.8f
-- [ ] 1.8b `Rinzler78.Templates` — the coverage gate: the floor per project, the diff
+- [x] 1.8b `Rinzler78.Templates` — the coverage gate: the floor per project, the diff
       coverage on a pull request.
-      Done when: a scratch project under the floor fails its pull request
+      Done when: a scratch project under the floor fails its pull request.
+      Proven for the gate: a regenerated library with untested code fails it, tested it
+      holds. The pull-request step of `ci.yml` is in the template and ran on the
+      Toolkit itself; its first run in a generated repository is 1.11f.
+      `coverage.sh --gate [--since <revision>]` holds each project to its contract:
+      90 % of lines and branches when `Enforced`, the `RinzlerCoverageFloor` it declares
+      when `Reduced`, nothing when `Exempt`, and 95 % of the changed lines on a diff.
+      A report of another checkout is refused, never read as nothing to cover.
+      Delivered by `Rinzler78.Toolkit` pull request #23. The check that a `Reduced` or
+      `Exempt` project cites an ADR is 1.8e
 - [ ] 1.8c `Rinzler78.Templates` — the `Committed` trimming measurement written to the
       `README.md`, and the full gate on a pull request into `master`: AOT, measured
       sizes posted on the pull request.
