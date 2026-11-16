@@ -22,7 +22,7 @@ flowchart LR
 
 - GitHub holds code, pull requests, rulesets and actions. Agents reach it with `gh`.
 - nuget.org receives packages through trusted publishing over GitHub OIDC. No long-lived nuget.org key exists anywhere.
-- On the owner's plan, rulesets, environments and Pages exist only on public repositories. Repositories still being built stay private until task `10.1`, so they apply none of them; task `1.12a` settles how they publish a prerelease.
+- On the owner's plan, rulesets, environments and Pages exist only on public repositories. Repositories taking part in the extraction of the abstraction stay private until task `10.1`, so they apply none of them; task `1.12a` settles how they publish a prerelease.
 - Publication procedure and its traps: `docs/runbooks/nuget-publication.md`.
 - HERE services: credentials are managed on the HERE Developer Portal, in a web console only. No agent reaches it.
 - HERE credentials reach CI through GitHub Actions secrets and locally through user secrets or environment variables; the sets and their names are specified in `openspec/changes/001-ecosystem-foundation/specs/secrets/spec.md`.
