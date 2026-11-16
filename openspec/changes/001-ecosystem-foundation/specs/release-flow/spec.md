@@ -23,7 +23,7 @@ has already exercised it.
 ### Requirement: One branch, one worktree, never reused
 
 Every repository SHALL carry two long-lived branches. `develop` is where work lands.
-`master` only receives promotions from `develop`, and pre-releases and releases are
+`master` only receives promotions from `develop` and hotfixes, and pre-releases and releases are
 cut from it. Work SHALL happen on a `feature/<kebab-slug>` branch cut from `develop`,
 in a dedicated worktree at `<repo>/.worktrees/<kebab-slug>/`. Every change to either
 long-lived branch SHALL go through a pull request, promotions and submodule bumps
@@ -55,9 +55,9 @@ request and the status checks, with signed commits and blocked force-push and
 deletion, administrators included — without bypass.
 
 - `develop` SHALL accept squashed pull requests only, with a linear history.
-- `master` SHALL accept pull requests from this repository's `develop`, and from a
-  `hotfix/` branch cut from `master`, only; a hotfix is merged back into `develop` by
-  its own pull request. No ruleset can restrict a source branch, so a required check, `promotion-source`, SHALL enforce
+- `master` SHALL accept pull requests only from this repository's `develop` and from
+  its `hotfix/` branches, which are cut from `master` and merged back into `develop` by
+  their own pull request. No ruleset can restrict a source branch, so a required check, `promotion-source`, SHALL enforce
   it — run through `pull_request_target`, from the base branch's own copy of the
   workflow and without checking out the pull request, so that no pull request can
   rewrite the gate it is judged by.
@@ -155,9 +155,19 @@ commits since it, its height — `1.2.1-alpha.0.3` three commits after `v1.2.0`,
 
 #### Scenario: a promotion and a hotfix may reach master
 - **GIVEN** a pull request into `master` whose source is `develop`, or a `hotfix/` branch
-  cut from `master`
+  of this repository
 - **WHEN** `promotion-source` runs
 - **THEN** it passes
+
+### Requirement: Issue templates make triage possible
+
+Each repository SHALL carry `.github/ISSUE_TEMPLATE/` with forms for `bug`,
+`feature` and `chore`, delivered by the template. Each form SHALL require the
+information triage needs — expected versus observed behaviour, affected target
+frameworks and platforms, and for a behavioural change the linked OpenSpec proposal.
+
+Each form SHALL apply `needs-triage` and its type label automatically, so that an
+issue never enters the queue unlabelled.
 
 #### Scenario: an issue arrives already typed
 - **GIVEN** a bug reported through the form

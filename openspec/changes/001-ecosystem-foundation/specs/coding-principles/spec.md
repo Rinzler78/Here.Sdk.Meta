@@ -142,7 +142,7 @@ request's commit list**, which is where the order survives.
 
 `release-flow` requires a linear history on `develop`, so feature merges are squashed
 and intermediate commits do not reach `develop`, nor `master`, which receives only
-promotions of `develop`. Verification
+promotions of `develop` and hotfixes. Verification
 SHALL therefore run on the pull request's own commits, before the squash, and its
 verdict SHALL be recorded as a status check — the check outliving the commits it
 inspected.

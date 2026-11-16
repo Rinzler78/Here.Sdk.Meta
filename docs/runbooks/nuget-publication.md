@@ -53,7 +53,7 @@ git push origin develop:master
 
 This is the one direct push the flow allows, and `release-flow` names it: it creates a
 branch rather than changing one, before any promotion can exist. From then on `master`
-moves only through promotion pull requests from `develop`, merged with a merge commit.
+moves only through pull requests from `develop` or a `hotfix/` branch, merged with a merge commit.
 
 ## Step 3 — forge settings
 
@@ -83,7 +83,7 @@ The settings:
   required and bound to GitHub Actions;
 - `master`: pull request, merge commits only, signed, the same checks plus
   `promotion-source` (*pending*) — `promotion.yml`, run from `master`'s own copy through
-  `pull_request_target`, refusing any source but this repository's `develop` — and no
+  `pull_request_target`, refusing any source but this repository's `develop` and its `hotfix/` branches — and no
   linear history, since a promotion keeps `develop`'s history. `master` must carry
   `promotion.yml` before the check is required, or no pull request into it can merge:
   a generated repository will have it from creation;

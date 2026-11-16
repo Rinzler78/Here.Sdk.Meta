@@ -265,10 +265,10 @@ nuget.org from one. 1.11a and 1.12 also use a private one, to show the private c
       after an apply, on a private one it reports those items not applicable, and reports a seeded drift; the Toolkit is applied only by 1.11f
 - [ ] 1.11b `Rinzler78.Templates` and `scripts/_provision-forge.sh` — `promotion.yml`,
       run from `master`'s own copy through `pull_request_target`, refusing any source
-      but the repository's `develop` and its `hotfix/` branches, and the `promotion-source` check required on
-      `master` and read back by the verification mode of 1.11a. Neither exists today.
-      Done when: a promotion pull request from `develop` is accepted and one from any
-      other branch is refused, on a scratch repository
+      but the repository's `develop` and its `hotfix/` branches, and the
+      `promotion-source` check required on `master` and read back by the verification mode of 1.11a. Neither exists today.
+      Done when: a pull request from `develop` or a `hotfix/` branch is accepted and one
+      from any other branch is refused, on a scratch repository
 - [ ] 1.11c Decision: the identity the cascade writes with across repositories. No
       repository's `GITHUB_TOKEN` can reach another, and `release-flow` records that
       the identity "is not yet specified". Candidates: a GitHub App installation
