@@ -326,7 +326,8 @@ nuget.org from one. 1.11a and 1.12 also use a private one, to show the private c
       runs (2.4 requests them) and belong to it as secrets; the Renovate installation and the identity's write access to
       the repository are portal steps only you can take; wire
       `Here.Sdk.Build` into every generated `Here.Sdk.*` repository but itself once 1.14 has
-      published it (the first `Here.Sdk.*` repository after it checks this), and add it to `Meta` as a
+      published it (the first `Here.Sdk.*` repository provisioned after 1.14 verifies that the wiring
+      resolves), and add it to `Meta` as a
       submodule under `repos/<name>` tracking `develop`. Visibility follows
       `ecosystem-architecture`: the toolchain repositories are public from creation, the
       others private until extraction is complete; a policy on a private repository is
@@ -485,7 +486,8 @@ nuget.org from one. 1.11a and 1.12 also use a private one, to show the private c
       step only you can take: one set **per demonstration bundle identifier** for every
       mobile application of the catalogue of 1.20 — `iOS` and `Android` hold two
       applications each, so two sets each, and none is shared — and the server-side
-      key for the `Core`, `Rest`, `Navigation` and `Blazor` Server demonstrations, and the integration
+      key for the `Core`, `Rest`, `Navigation` and `Blazor` Server demonstrations; the desktop heads take no stored set, since `secrets` has them read user
+      secrets or environment variables; and the integration
       tests. The sets are held outside any repository; the task provisioning a
       repository, through 1.12, stores its own in that repository's GitHub Actions
       secrets.

@@ -53,7 +53,7 @@ the realisation order is complete.
 #### Scenario: an incomplete ecosystem does not fail the audit
 - **GIVEN** realisation is part-way and some packages are published
 - **WHEN** the ecosystem audit runs
-- **THEN** it reports N of twenty-nine published, N being the number published,, without raising a failure
+- **THEN** it reports N of twenty-nine published, N being the number published, without raising a failure
 
 ### Requirement: The target framework matrix is complete on both layers
 
