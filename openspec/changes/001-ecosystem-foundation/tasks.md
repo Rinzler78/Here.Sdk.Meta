@@ -265,7 +265,7 @@ nuget.org from one. 1.11a and 1.12 also use a private one, to show the private c
       after an apply, on a private one it reports those items not applicable, and reports a seeded drift; the Toolkit is applied only by 1.11f
 - [ ] 1.11b `Rinzler78.Templates` and `scripts/_provision-forge.sh` — `promotion.yml`,
       run from `master`'s own copy through `pull_request_target`, refusing any source
-      but the repository's `develop`, and the `promotion-source` check required on
+      but the repository's `develop` and its `hotfix/` branches, and the `promotion-source` check required on
       `master` and read back by the verification mode of 1.11a. Neither exists today.
       Done when: a promotion pull request from `develop` is accepted and one from any
       other branch is refused, on a scratch repository
@@ -305,7 +305,7 @@ nuget.org from one. 1.11a and 1.12 also use a private one, to show the private c
       comes last.
       Done when: the script's verification mode reports the Toolkit conforming, the
       tag publishes, and the dispatch step runs and reaches `Meta`
-- [ ] 1.12a Decision: how a private repository of the extraction publishes `alpha.N`
+- [ ] 1.12a Decision, taken before 1.12 because 1.12 relies on it: how a private repository of the extraction publishes `alpha.N`
       without the `release` environment and the rulesets its plan cannot apply. The
       runbook shows that a nuget.org policy without an environment lets any ref carrying
       `release.yml` mint a key. Candidates: upgrade the plan, accept the weaker policy for `alpha.N` under an

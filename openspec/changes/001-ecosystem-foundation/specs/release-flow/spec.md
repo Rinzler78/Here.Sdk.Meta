@@ -55,10 +55,9 @@ request and the status checks, with signed commits and blocked force-push and
 deletion, administrators included — without bypass.
 
 - `develop` SHALL accept squashed pull requests only, with a linear history.
-- `master` SHALL accept pull requests from this repository's `develop` only; a hotfix
-  branches from `master`, merges into `develop` by pull request and reaches `master` by
-  the next promotion, like any other change. No ruleset
-  can restrict a source branch, so a required check, `promotion-source`, SHALL enforce
+- `master` SHALL accept pull requests from this repository's `develop`, and from a
+  `hotfix/` branch cut from `master`, only; a hotfix is merged back into `develop` by
+  its own pull request. No ruleset can restrict a source branch, so a required check, `promotion-source`, SHALL enforce
   it — run through `pull_request_target`, from the base branch's own copy of the
   workflow and without checking out the pull request, so that no pull request can
   rewrite the gate it is judged by.
@@ -149,21 +148,16 @@ commits since it, its height — `1.2.1-alpha.0.3` three commits after `v1.2.0`,
 - **THEN** the version is a patch, and a range of `chore` commits alone calls for no
   release
 
-#### Scenario: a pull request into master must come from develop
+#### Scenario: a pull request into master from a feature branch is refused
 - **GIVEN** a pull request into `master` whose source is a `feature/` branch
 - **WHEN** `promotion-source` runs
-- **THEN** it fails, and it passes for a pull request from `develop`
-- **AND** a hotfix reaches `master` through `develop` like any other change
+- **THEN** it fails
 
-### Requirement: Issue templates make triage possible
-
-Each repository SHALL carry `.github/ISSUE_TEMPLATE/` with forms for `bug`,
-`feature` and `chore`, delivered by the template. Each form SHALL require the
-information triage needs — expected versus observed behaviour, affected target
-frameworks and platforms, and for a behavioural change the linked OpenSpec proposal.
-
-Each form SHALL apply `needs-triage` and its type label automatically, so that an
-issue never enters the queue unlabelled.
+#### Scenario: a promotion and a hotfix may reach master
+- **GIVEN** a pull request into `master` whose source is `develop`, or a `hotfix/` branch
+  cut from `master`
+- **WHEN** `promotion-source` runs
+- **THEN** it passes
 
 #### Scenario: an issue arrives already typed
 - **GIVEN** a bug reported through the form
@@ -401,14 +395,14 @@ At minimum:
   cascade opens its bump pull requests in other repositories, which no repository's
   `GITHUB_TOKEN` can reach whatever this switch says; the identity the cascade writes
   with is decided with the cascade itself, and is not yet specified.
-- **Wherever the owner's plan allows rulesets, environments and Pages** —
-  `ecosystem-architecture` states the private-repository case, where the audit reports
-  them not applicable — **the `release` environment SHALL admit tags `v*` only.** A trusted publishing policy
+- Where the owner's plan allows rulesets, environments and Pages (`ecosystem-architecture`
+  states the private-repository case, which the audit reports not applicable), **the
+  `release` environment SHALL admit tags `v*` only.** A trusted publishing policy
   matches the workflow's file name and the environment, never the ref, and GitHub
   silently creates an unprotected environment the first time a job names one. Any other
   deployment policy SHALL be removed, not merely outnumbered.
-- **The rulesets of `Blocking checks are automated` SHALL be applied**, under the same
-  condition — both
+- Under the same condition, **the rulesets of `Blocking checks are automated` SHALL be
+  applied** — both
   long-lived branches, the immutable release tags, and their creation by administrators.
 - **Copilot SHALL review every push** to a pull request into either long-lived branch,
   through the ruleset's `copilot_code_review` rule, so that the review loop of
