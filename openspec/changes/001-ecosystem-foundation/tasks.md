@@ -118,12 +118,13 @@ nuget.org from one. 1.11a and 1.12 also use a private one, to show the private c
       Not yet exercised: the workflow on GitHub, which runs first on a regenerated
       repository (1.11f and the extraction repositories); the badge renders only for a
       public repository (10.1), and the README embed is left to each repository
-- [ ] 1.8a Reconcile the trimming vocabulary: `quality` names `Committed`, `Analyzed`
-      and `OutOfScope`, while `Rinzler78.Build` validates `OutOfScope`, `Trimmable` and
-      `AotCompatible`. One of the two changes, by an ADR in `Meta`.
-      A change in `Rinzler78.Build` is published by 1.8f.
-      Done when: spec and `Rinzler78.Build` use the same three values, and a project
-      declaring any other fails the build
+- [x] 1.8a Reconcile the trimming vocabulary: `quality` names `Committed`, `Analyzed`
+      and `OutOfScope`, while `Rinzler78.Build` validated `OutOfScope`, `Trimmable` and
+      `AotCompatible`. The specification wins, by ADR 0002 in `Meta`: `Rinzler78.Build`
+      now takes the three values, `Committed` marking `IsTrimmable` from `net6.0` and
+      `IsAotCompatible` from `net7.0`, `Analyzed` running the trim analyser and marking
+      nothing. Delivered by `Rinzler78.Toolkit` pull request #22.
+      A change in `Rinzler78.Build` is published by 1.8f
 - [ ] 1.8b `Rinzler78.Templates` — the coverage gate: the floor per project, the diff
       coverage on a pull request.
       Done when: a scratch project under the floor fails its pull request
