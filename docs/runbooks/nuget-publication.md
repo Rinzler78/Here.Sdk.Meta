@@ -25,7 +25,7 @@ A repository generated from `Rinzler78.Templates` arrives with:
 - `scripts/publish.sh` — refuses any package whose manifest does not declare
   `EXPECTED_VERSION`, the tag's version; the release workflow runs that check on its
   own, before it requests the credential;
-- `scripts/_provision-forge.sh` — every forge setting below, idempotent.
+- `scripts/_provision-forge.sh` — every forge setting below, except those marked *pending*, idempotent.
 
 Nothing in the tree needs editing. Everything below lives outside it.
 
@@ -61,7 +61,20 @@ moves only through promotion pull requests from `develop`, merged with a merge c
 bash scripts/_provision-forge.sh Rinzler78/<name>
 ```
 
-It applies, and re-applies without harm:
+It applies, and re-applies without harm. Five items are marked *pending*: the script
+or the release workflow does not carry them yet.
+
+- the Copilot rule (task 1.11a of `001-ecosystem-foundation`);
+- `promotion-source` (1.11b);
+- the domain reviewers (1.11);
+- the release checks of the tag (1.7 and 1.9);
+- the not-applicable report on a private repository (1.11a).
+
+On the owner's plan, rulesets, environments and Pages exist only on a public repository,
+so the script will apply them there and report them not applicable on a private one
+(pending, task 1.11a).
+
+The settings:
 
 - a read-only default workflow token that cannot create or approve pull requests;
 - the `release` environment, admitting tags `v*` only — any other deployment policy is
@@ -69,20 +82,20 @@ It applies, and re-applies without harm:
 - `develop`: pull request, squash only, linear history, signed, `verify` and `lint`
   required and bound to GitHub Actions;
 - `master`: pull request, merge commits only, signed, the same checks plus
-  `promotion-source` — `promotion.yml`, run from `master`'s own copy through
+  `promotion-source` (*pending*) — `promotion.yml`, run from `master`'s own copy through
   `pull_request_target`, refusing any source but this repository's `develop` — and no
   linear history, since a promotion keeps `develop`'s history. `master` must carry
   `promotion.yml` before the check is required, or no pull request into it can merge:
-  a generated repository has it from creation;
-- Copilot reviewing every push to a pull request into either branch;
+  a generated repository will have it from creation;
+- Copilot reviewing every push to a pull request into either branch (*pending*);
 - tags `v*`: neither updatable nor deletable by anyone, and created by administrators
   only — two rulesets, because a bypass applies to a whole ruleset.
 
 The required checks are `verify` (build and tests) and `lint` (static quality), the jobs
 of the harness's `ci.yml`. The domain reviewers `release-flow` also requires,
-`spec-reviewer` and `package-api-reviewer`, join them in the script when they exist;
-no task schedules them yet. A check the ruleset requires must exist: a repository without that
-workflow — `Here.Sdk.Meta` before it is generated from the template — would have every
+`spec-reviewer` and `package-api-reviewer`, join them in the script when they exist
+(task 1.11 of `001-ecosystem-foundation`). A check the ruleset requires must exist: a repository without that
+workflow — `Here.Sdk.Meta` before it carries the CI — would have every
 pull request blocked on checks that never run. Provision it once it carries the CI.
 
 **Why the environment is not optional.** A nuget.org policy matches the repository owner,
@@ -154,7 +167,9 @@ window; a public repository's policy is active immediately.
    `git diff "${previous:-$(git hash-object -t tree /dev/null)}" origin/master -- '*PublicAPI.Unshipped.txt'`,
    against the empty tree before the first release. **1.0.0 after a 0.x version** is
    accepted only with an ADR of the repository declaring its public surface stable:
-   add that ADR's path to the message; without it the release check refuses 1.0.0.
+   add that ADR's path to the message; without it the release check refuses 1.0.0 —
+   *pending*: neither `_release-tag.sh` nor `release.yml` carries that check yet
+   (tasks 1.7 and 1.9).
 
    The push publishes, directly. There is no draft and no second gesture: the tag check,
    the immutable tags and the promotion pull request are what bound an irreversible push.

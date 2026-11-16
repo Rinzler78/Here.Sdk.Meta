@@ -50,7 +50,7 @@ agent — `src/` **and** `tests/` — so that two agents never contend for the s
 
 ### Requirement: Blocking checks are automated; human approvals are zero
 
-Both long-lived branches SHALL be protected by GitHub Rulesets requiring a pull
+Both long-lived branches SHALL be protected, wherever the owner's plan allows rulesets (`ecosystem-architecture` states the private-repository case), by GitHub Rulesets requiring a pull
 request and the status checks, with signed commits and blocked force-push and
 deletion, administrators included — without bypass.
 
@@ -245,9 +245,9 @@ pushes the regenerated lock file. It SHALL serve both Renovate and the cascade.
 
 ### Requirement: The triage state machine is enforceable
 
-Thirteen labels SHALL exist identically in every repository, created at bootstrap:
+Fourteen labels SHALL exist identically in every repository, created at bootstrap:
 five triage states (`needs-triage`, `needs-info`, `ready-for-agent`,
-`ready-for-human`, `wontfix`), seven types aligned with Conventional Commits, and
+`ready-for-human`, `wontfix`), seven types aligned with Conventional Commits (`feat`, `fix`, `perf`, `docs`, `chore`, `refactor`, `test`), and
 `breaking-change`, plus `blocked`.
 
 A workflow SHALL refuse `ready-for-agent` on an issue that does not carry exactly

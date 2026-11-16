@@ -273,12 +273,12 @@ survives this project.
 | Two test frameworks, split by generation | Only necessary if a test project targets a Xamarin moniker. None does, so the split buys nothing and costs a conditioned `Directory.Packages.props`. |
 | One Appium suite per head | Eighteen copies of one canonical scenario, free to drift apart while all staying green. |
 | NUnit for the user interface suite | Inherited from the Appium documentation. The client is framework-agnostic, and a second framework for one medium is a second thing to keep aligned. |
-| A central upgrade proposal in `Meta` | Makes seventeen repositories depend on the cockpit for a decision that is theirs. Repositories are autonomous; the package and its version are the protocol. |
+| A central upgrade proposal in `Meta` | Makes eighteen repositories depend on the cockpit for a decision that is theirs. Repositories are autonomous; the package and its version are the protocol. |
 | Scraping the HERE release notes | The documentation site is a single-page application whose Android and iOS release-note URLs return byte-identical documents. The examples repository publishes dated releases through the GitHub API instead. |
-| Shipping `PublicAPI.Shipped.txt` inside the package for consumers to assert against | Duplicates what the compiler already does, and adds twenty-eight downstream baselines to keep true. A duplicated baseline eventually lies. |
+| Shipping `PublicAPI.Shipped.txt` inside the package for consumers to assert against | Duplicates what the compiler already does, and adds one downstream baseline per package to keep true. A duplicated baseline eventually lies. |
 | FluentAssertions 8 and later | Ships the Xceed Community License Agreement, restricted to non-commercial use, on an ecosystem whose purpose is to win commercial work. The Apache-2.0 fork keeps the API without the question. |
 | Integration tests sharing the unit test project | Would make diff coverage depend on whether a credential is configured, so the same commit passes or fails by environment. |
-| An integration test mechanism in all nineteen repositories | Empty ceremony in the thirteen that reach no network, and a mechanism useful nowhere stops being verified. |
+| An integration test mechanism in all nineteen repositories | Empty ceremony in the fourteen that reach no network, and a mechanism useful nowhere stops being verified. |
 | Both Xcode versions on one machine, selected per job | Keeps a May 2024 Xcode on a 2026 operating system with no Apple support and no recourse once it is unsigned, and requires updating a machine whose purpose is to stay frozen. |
 | A second virtualised macOS for the modern heads | Permitted by Apple's licence, but adds a system to administer while a hosted image already carries the required Xcode. Kept as the fallback. |
 | Appium's Windows driver for the MAUI Windows heads | It delegates to Microsoft's WinAppDriver, whose last release is v1.2.99 of 1 July 2021. FlaUI drives UI Automation directly and is actively released. |
