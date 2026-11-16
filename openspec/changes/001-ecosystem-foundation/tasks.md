@@ -110,7 +110,7 @@ nuget.org from one. 1.11a and 1.12 also use a private one, to show the private c
 - [x] 1.8 `Rinzler78.Templates` — Stryker.NET wired to the diff on every pull request and
       in full nightly on the portable libraries, break threshold 70 %, target 85 %.
       `scripts/mutation.sh` skips a project declaring `RinzlerCoverageContract` Exempt,
-      the bindings included, and a repository without an assembly carries no mutation
+      as a binding must, and a repository without an assembly carries no mutation
       job: only `rinzler-lib` ships `mutation.yml`. The nightly records the scores and a
       shields.io badge on an orphan `badges` branch; the diff run takes the project's
       full-run score from it as its floor, so the diff score never regresses. Delivered
