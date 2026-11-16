@@ -14,8 +14,8 @@ SHALL remain `Here.Sdk.*`. Only `<PackageId>` carries the prefix.
 
 ### Requirement: The ecosystem is nineteen repositories and twenty-nine packages
 
-The ecosystem SHALL consist of exactly nineteen repositories publishing exactly
-twenty-nine packages, as enumerated below. Any addition or removal SHALL require
+The ecosystem SHALL consist of exactly nineteen repositories, eighteen of them
+publishing exactly twenty-nine packages, as enumerated below. Any addition or removal SHALL require
 an OpenSpec change.
 
 | Repository | Packages |
@@ -51,9 +51,9 @@ the realisation order is complete.
 - **THEN** it reports the package as unplanned
 
 #### Scenario: an incomplete ecosystem does not fail the audit
-- **GIVEN** realisation has reached phase 4 and eleven packages are published
+- **GIVEN** realisation is part-way and some packages are published
 - **WHEN** the ecosystem audit runs
-- **THEN** it reports eleven of twenty-nine published, without raising a failure
+- **THEN** it reports N of twenty-nine published, N being the number published, without raising a failure
 
 ### Requirement: The target framework matrix is complete on both layers
 
@@ -110,7 +110,7 @@ SHALL NOT live in the agnostic package: a toolkit published under a personal pre
 cannot impose a third party's commercial notice on consumers who have nothing to do
 with that third party.
 
-Publishing twenty-nine packages named `Here.Sdk.*` without that statement is a
+Publishing twenty-seven packages named `Here.Sdk.*` without that statement is a
 trademark and expectation risk, not a formality.
 
 #### Scenario: the disclaimer travels with the package

@@ -19,13 +19,13 @@ A repository generated from `Rinzler78.Templates` arrives with:
   tree, asks GitHub for an OIDC token **immediately before the push**, publishes, and
   creates the GitHub release with generated notes;
 - `scripts/_release-tag.sh` — refuses a tag outside `vMAJOR.MINOR.PATCH[-(alpha|beta|rc).N]`,
-  a lightweight tag, a tag whose signature GitHub does not verify, and a tag on a commit
+  a lightweight tag, a tag whose signature GitHub does not verify, and a tag on a commit that
   `master` does not contain;
 - MinVer, in `Directory.Packages.props` — the version comes from the tags alone;
-- `scripts/publish.sh` — refuses any package whose manifest does not declare
-  `EXPECTED_VERSION`, the tag's version; the release workflow runs that check on its
+- `scripts/publish.sh` — refuses any package whose version differs from
+  `--expect`, the tag's version; the release workflow runs that check on its
   own, before it requests the credential;
-- `scripts/_provision-forge.sh` — every forge setting below, idempotent.
+- `scripts/_provision-forge.sh` — every forge setting below, except those marked *pending*, idempotent.
 
 Nothing in the tree needs editing. Everything below lives outside it.
 
@@ -53,7 +53,7 @@ git push origin develop:master
 
 This is the one direct push the flow allows, and `release-flow` names it: it creates a
 branch rather than changing one, before any promotion can exist. From then on `master`
-moves only through promotion pull requests from `develop`, merged with a merge commit.
+moves only through pull requests from `develop` or a `hotfix/` branch, merged with a merge commit.
 
 ## Step 3 — forge settings
 
@@ -61,23 +61,41 @@ moves only through promotion pull requests from `develop`, merged with a merge c
 bash scripts/_provision-forge.sh Rinzler78/<name>
 ```
 
-It applies, and re-applies without harm:
+It applies, and re-applies without harm. Five items are not yet carried by the script
+or the release workflow, and are marked *pending*:
+
+- the Copilot rule (task 1.11a of `001-ecosystem-foundation`), *pending*;
+- `promotion-source` (1.11b), *pending*;
+- the domain reviewers (1.11), *pending*;
+- the release checks of the tag (1.7 and 1.9), *pending*;
+- the not-applicable report on a private repository (1.11a), *pending*.
+
+On the owner's plan, rulesets, environments and Pages exist only on a public repository,
+so the script will apply them there and report them not applicable on a private one
+(pending, task 1.11a).
+
+The settings:
 
 - a read-only default workflow token that cannot create or approve pull requests;
 - the `release` environment, admitting tags `v*` only — any other deployment policy is
   deleted, not merely outnumbered;
 - `develop`: pull request, squash only, linear history, signed, `verify` and `lint`
   required and bound to GitHub Actions;
-- `master`: pull request, merge commits only, signed, the same checks, no linear
-  history — a promotion keeps `develop`'s history;
+- `master`: pull request, merge commits only, signed, the same checks plus
+  `promotion-source` (*pending*) — `promotion.yml`, run from `master`'s own copy through
+  `pull_request_target`, refusing any source but this repository's `develop` and its `hotfix/` branches — and no
+  linear history, since a promotion keeps `develop`'s history. `master` must carry
+  `promotion.yml` before the check is required, or no pull request into it can merge:
+  a generated repository will have it from creation;
+- Copilot reviewing every push to a pull request into either branch (*pending*);
 - tags `v*`: neither updatable nor deletable by anyone, and created by administrators
   only — two rulesets, because a bypass applies to a whole ruleset.
 
 The required checks are `verify` (build and tests) and `lint` (static quality), the jobs
 of the harness's `ci.yml`. The domain reviewers `release-flow` also requires,
-`spec-reviewer` and `package-api-reviewer`, join them in the script when they exist;
-no task schedules them yet. A check the ruleset requires must exist: a repository without that
-workflow — `Here.Sdk.Meta` before it is generated from the template — would have every
+`spec-reviewer` and `package-api-reviewer`, join them in the script when they exist
+(task 1.11 of `001-ecosystem-foundation`). A check the ruleset requires must exist: a repository without that
+workflow — `Here.Sdk.Meta` before it carries the CI — would have every
 pull request blocked on checks that never run. Provision it once it carries the CI.
 
 **Why the environment is not optional.** A nuget.org policy matches the repository owner,
@@ -85,7 +103,9 @@ the repository, the workflow's *file name* and the environment — **never the r
 Without an environment, any ref carrying a file named `release.yml` can mint a key, and
 the `push: tags` trigger cannot prevent it, because it lives in the very file a branch
 could rewrite. GitHub also silently *creates* an unprotected environment the first time a
-job names one.
+job names one. On the owner's plan a private repository can hold no environment, so
+it publishes no stable version: how it publishes an `alpha.N` is the decision of task
+1.12a, and the environment is applied when the repository becomes public.
 
 ## Step 4 — the nuget.org policy
 
@@ -131,10 +151,27 @@ window; a public repository's policy is active immediately.
    checks are the costly ones; nothing expensive is discovered after this point.
 2. When certain, tag the merge commit and push the tag:
 
+   The tag's message is the version, then the evidence the proposal cited — the
+   Conventional Commits since the previous tag, or the surface diff:
+
    ```bash
-   git fetch origin && git tag --sign --annotate v0.2.0 --message v0.2.0 origin/master
+   git fetch origin --tags
+   # Empty before a repository's first release: the log then covers all history.
+   previous=$(git describe --tags --abbrev=0 origin/master 2>/dev/null || true)
+   # Subjects and bodies: a BREAKING CHANGE footer is evidence too.
+   { echo v0.2.0; echo; git log --no-merges --format='- %s%n%b' "${previous:+$previous..}origin/master"; } |
+     git tag --sign --annotate v0.2.0 --file - origin/master
    git push origin v0.2.0
    ```
+
+   For a version derived from a public API, the evidence is the surface diff: replace
+   the `git log` line with
+   `git diff "${previous:-$(git hash-object -t tree /dev/null)}" origin/master -- '*PublicAPI.Unshipped.txt'`,
+   against the empty tree before the first release. **1.0.0 after a 0.x version** is
+   accepted only with an ADR of the repository declaring its public surface stable:
+   add that ADR's path to the message; without it the release check refuses 1.0.0 —
+   *pending*: neither `_release-tag.sh` nor `release.yml` carries that check yet
+   (tasks 1.7 and 1.9).
 
    The push publishes, directly. There is no draft and no second gesture: the tag check,
    the immutable tags and the promotion pull request are what bound an irreversible push.

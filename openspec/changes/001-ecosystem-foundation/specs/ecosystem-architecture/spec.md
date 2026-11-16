@@ -100,7 +100,10 @@ stable form, nor any repository taking part in the extraction made public, befor
 extraction is complete. The toolchain repositories — `Rinzler78.Toolkit` and
 `Here.Sdk.Build` — take no part in it and are public from their creation: a package
 pointing at a private repository sends every consumer to a 404, and its SourceLink to
-sources nobody can read.
+sources nobody can read. Where the owner's plan offers no rulesets, environments or
+Pages on a private repository, a private repository of the extraction applies none of
+them until it is public, and the local harness stands in; how it publishes a
+prerelease is settled by an ADR.
 
 #### Scenario: no project reference crosses a repository boundary
 - **GIVEN** any repository in the ecosystem

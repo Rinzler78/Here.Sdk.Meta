@@ -128,11 +128,17 @@ dependency-freshness gate that requires those bumps to land unattended. A
 specification that has to be edited to stay true is a specification that will stop
 being true.
 
-Two exceptions SHALL hold, and both are deliberate freezes rather than current
-values: the HERE SDK artefacts pinned per column, whose raise is a proposal by
+Two freezes SHALL hold, both deliberate rather than current values: the HERE SDK artefacts pinned per column, whose raise is a proposal by
 design, and the frozen Xamarin toolchain with its pinned Xcode. A version that is
 itself the decision belongs in the specification; a version that merely happens to
-be the latest does not.
+be the latest does not. Dated facts of a store's policy, target framework generations, the rationale quoted in `design.md` and the version a
+requirement quotes as the reason for a choice are not versions of a dependency, and
+the audit exempts them.
+
+#### Scenario: a quoted version passes the audit
+- **GIVEN** a requirement quoting a version as the reason for a choice
+- **WHEN** the audit scans the specifications for version literals
+- **THEN** that literal is not reported, and a literal naming a dependency's current version is reported
 
 #### Scenario: a routine bump does not touch the specification
 - **GIVEN** Renovate raises the assertion library by one minor version
@@ -166,8 +172,8 @@ stewardship:
 
 The self-hosted machine SHALL carry the Xamarin column and nothing else. The two
 generations are separated by two major operating system versions, not by two Xcode
-minors: the current .NET 10 iOS servicing release requires Xcode 26.6, which
-requires macOS 26.2, while Xcode 15.4 dates from May 2024. The modern iOS heads
+minors: the current .NET iOS servicing release requires an Xcode that requires a
+macOS two majors above the frozen one, while Xcode 15.4 dates from May 2024. The modern iOS heads
 SHALL therefore build on GitHub-hosted macOS images, which carry the required Xcode.
 
 Neither generation SHALL be moved onto the other's machine. Installing both Xcode
@@ -200,7 +206,8 @@ Self-hosted jobs SHALL be conditioned on
 `github.event.pull_request.head.repo.full_name == github.repository`, and SHALL run
 on `push`, on schedule and on `workflow_dispatch`. The runner SHALL be ephemeral,
 SHALL run under a dedicated macOS account with no access to personal keychains, and
-`pull_request_target` SHALL be forbidden — verified by a check.
+`pull_request_target` SHALL be forbidden — verified by a check — except in
+`promotion.yml`, which `release-flow` requires to run through it from `master`'s own copy.
 
 #### Scenario: a fork pull request never reaches the machine
 - **GIVEN** a pull request opened from a fork

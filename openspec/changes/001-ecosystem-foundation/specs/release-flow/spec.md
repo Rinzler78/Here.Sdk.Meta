@@ -23,7 +23,7 @@ has already exercised it.
 ### Requirement: One branch, one worktree, never reused
 
 Every repository SHALL carry two long-lived branches. `develop` is where work lands.
-`master` only receives promotions from `develop`, and pre-releases and releases are
+`master` only receives promotions from `develop` and hotfixes, and pre-releases and releases are
 cut from it. Work SHALL happen on a `feature/<kebab-slug>` branch cut from `develop`,
 in a dedicated worktree at `<repo>/.worktrees/<kebab-slug>/`. Every change to either
 long-lived branch SHALL go through a pull request, promotions and submodule bumps
@@ -50,11 +50,17 @@ agent — `src/` **and** `tests/` — so that two agents never contend for the s
 
 ### Requirement: Blocking checks are automated; human approvals are zero
 
-Both long-lived branches SHALL be protected by GitHub Rulesets requiring a pull
+Both long-lived branches SHALL be protected, wherever the owner's plan allows rulesets (`ecosystem-architecture` states the private-repository case), by GitHub Rulesets requiring a pull
 request and the status checks, with signed commits and blocked force-push and
 deletion, administrators included — without bypass.
 
 - `develop` SHALL accept squashed pull requests only, with a linear history.
+- `master` SHALL accept pull requests only from this repository's `develop` and from
+  its `hotfix/` branches, which are cut from `master` and merged back into `develop` by
+  their own pull request. No ruleset can restrict a source branch, so a required check, `promotion-source`, SHALL enforce
+  it — run through `pull_request_target`, from the base branch's own copy of the
+  workflow and without checking out the pull request, so that no pull request can
+  rewrite the gate it is judged by.
 - `master` SHALL accept merge commits only, and SHALL NOT require a linear history. A
   promotion keeps `develop`'s history, so the base of the next promotion advances and
   its pull request shows only what is new. A squashed promotion would leave the base
@@ -68,16 +74,16 @@ deletion, administrators included — without bypass.
 Required status checks SHALL be bound to the GitHub Actions integration, since a check
 required by name alone is satisfied by any integration posting that name. They SHALL
 be the build, static quality, and two automated domain reviewers, each with a defined
-assertion:
+assertion, and, for `master` alone, `promotion-source`:
 
 | Reviewer | Asserts |
 |---|---|
 | `spec-reviewer` | The change implements the OpenSpec delta it claims, and every requirement touched has at least one scenario exercised by a test. |
-| `package-api-reviewer` | The `PublicAPI.Unshipped.txt` diff matches the version intent — no removed or changed public member without `breaking-change` and a major bump. |
+| `package-api-reviewer` | The `PublicAPI.Unshipped.txt` diff matches the version intent — no removed or changed public member without the `!` commit prefix, the `breaking-change` label and the breaking bump together: a major from 1.0.0 onwards, a minor before. |
 
 The domain reviewers join the required checks when they exist. Until then the required
-checks are the build and static quality alone: the `verify` and `lint` jobs of the
-harness.
+checks are the build and static quality, the `verify` and `lint` jobs of the
+harness, and `promotion-source` on `master`.
 
 Required human approvals SHALL be **zero**, the author being the sole maintainer;
 the gate is the machine, not a signature.
@@ -99,9 +105,27 @@ three labels the NuGet documentation defines, sorted alphabetically in the order
 their stability, with `rc.10` sorting after `rc.2`.
 
 A removed or changed public member SHALL require the `!` commit prefix, the
-`breaking-change` label and a major bump. The authority is the surface diff defined
-in `sdk-updates`, not the commit prefix: a mislabelled commit fails its release
-check rather than publishing a breaking change as a minor. A build of an untagged
+`breaking-change` label and the breaking bump: a major from 1.0.0 onwards, a minor
+before it, where SemVer declares the public API unstable. The authority is the surface
+diff defined in `sdk-updates`, not the commit prefix: a mislabelled commit fails its
+release check rather than publishing a breaking change as a minor.
+
+1.0.0 SHALL be a deliberate decision, never the consequence of a commit or a diff: an
+ADR of the repository declares its public surface stable, the proposed version cites
+it, and the release check SHALL accept 1.0.0 after a 0.x version when, and only when,
+that ADR exists — whatever the diff or the commits would otherwise require.
+
+A package with no public API surface — a props/targets package, a template pack —
+SHALL take its version from the Conventional Commits since the last tag. `!`, or a
+`BREAKING CHANGE` footer, is a breaking change; `feat` a minor one; `fix` and `perf` a
+patch; every other type — `chore`, `docs`, `refactor`, `test`, `build`, `ci`, `style`
+— has no effect on the version. The strongest effect in the range decides, and a range
+with no effect calls for no release.
+
+A proposed release version SHALL cite its evidence — the surface diff, the commits, or
+the stability ADR — and the annotated tag's message SHALL carry it. The release
+workflow SHALL verify that evidence before it builds and refuse a tag whose version,
+stability ADR or message lacks it: this is the release check. A build of an untagged
 commit SHALL carry a prerelease version computed from the last tag and the number of
 commits since it, its height — `1.2.1-alpha.0.3` three commits after `v1.2.0`,
 `1.2.0-rc.1.3` three commits after `v1.2.0-rc.1` — and is never published.
@@ -109,8 +133,31 @@ commits since it, its height — `1.2.1-alpha.0.3` three commits after `v1.2.0`,
 #### Scenario: a breaking change cannot ship as a patch
 - **GIVEN** a pull request removing a public member
 - **WHEN** `package-api-reviewer` compares `PublicAPI.Unshipped.txt`
-- **THEN** it fails unless the commit carries `!` and the issue carries
-  `breaking-change`
+- **THEN** it fails unless the commit carries `!`, the issue carries
+  `breaking-change` and the proposed version is the breaking bump: a major from 1.0.0
+  onwards, a minor before it, so `0.4.2` becomes `0.5.0`
+
+#### Scenario: 1.0.0 needs the stability ADR
+- **GIVEN** a proposed `1.0.0` after `0.9.0`, and no ADR declaring the surface stable
+- **WHEN** the release check runs
+- **THEN** it refuses the tag, and accepts it once the ADR exists
+
+#### Scenario: a package with no public API takes its version from the commits
+- **GIVEN** a props/targets package whose commits since the last tag are `docs` and `fix`
+- **WHEN** its version is proposed
+- **THEN** the version is a patch, and a range of `chore` commits alone calls for no
+  release
+
+#### Scenario: a pull request into master from a feature branch is refused
+- **GIVEN** a pull request into `master` whose source is a `feature/` branch
+- **WHEN** `promotion-source` runs
+- **THEN** it fails
+
+#### Scenario: a promotion and a hotfix may reach master
+- **GIVEN** a pull request into `master` whose source is `develop`, or a `hotfix/` branch
+  of this repository
+- **WHEN** `promotion-source` runs
+- **THEN** it passes
 
 ### Requirement: Issue templates make triage possible
 
@@ -154,8 +201,7 @@ The irreversibility of a push to nuget.org is accepted and bounded instead:
 - the costly checks run on the promotion pull request into `master`, before any tag
   can name its commit;
 - before anything is built, the release workflow SHALL refuse a tag outside that form,
-  a lightweight tag, a tag whose signature GitHub does not verify, and a tag on a
-  commit `master` does not contain;
+  a lightweight tag, a tag whose signature GitHub does not verify, and a tag on a commit that `master` does not contain;
 - tags cannot be moved or deleted, and only administrators create them;
 - every package SHALL carry exactly the tag's version, read from the version its
   manifest declares rather than from its file name, checked before the credential is
@@ -225,9 +271,9 @@ pushes the regenerated lock file. It SHALL serve both Renovate and the cascade.
 
 ### Requirement: The triage state machine is enforceable
 
-Thirteen labels SHALL exist identically in every repository, created at bootstrap:
+Fourteen labels SHALL exist identically in every repository, created at bootstrap:
 five triage states (`needs-triage`, `needs-info`, `ready-for-agent`,
-`ready-for-human`, `wontfix`), seven types aligned with Conventional Commits, and
+`ready-for-human`, `wontfix`), seven types aligned with Conventional Commits (`feat`, `fix`, `perf`, `docs`, `chore`, `refactor`, `test`), and
 `breaking-change`, plus `blocked`.
 
 A workflow SHALL refuse `ready-for-agent` on an issue that does not carry exactly
@@ -359,17 +405,24 @@ At minimum:
   cascade opens its bump pull requests in other repositories, which no repository's
   `GITHUB_TOKEN` can reach whatever this switch says; the identity the cascade writes
   with is decided with the cascade itself, and is not yet specified.
-- **The `release` environment SHALL admit tags `v*` only.** A trusted publishing policy
+- Where the owner's plan allows rulesets, environments and Pages (`ecosystem-architecture`
+  states the private-repository case, which the audit reports not applicable), **the
+  `release` environment SHALL admit tags `v*` only.** A trusted publishing policy
   matches the workflow's file name and the environment, never the ref, and GitHub
   silently creates an unprotected environment the first time a job names one. Any other
   deployment policy SHALL be removed, not merely outnumbered.
-- **The rulesets of `Blocking checks are automated` SHALL be applied** — both
+- Under the same condition, **the rulesets of `Blocking checks are automated` SHALL be
+  applied** — both
   long-lived branches, the immutable release tags, and their creation by administrators.
+- **Copilot SHALL review every push** to a pull request into either long-lived branch,
+  through the ruleset's `copilot_code_review` rule, so that the review loop of
+  `WORKFLOW.md` never depends on someone remembering to request it.
 
 The provisioning step is `scripts/_provision-forge.sh`, delivered by the template and
 idempotent.
 
-The audit SHALL report a repository whose forge settings diverge from these, in the same
+The audit SHALL report a repository whose forge settings diverge from these, except
+what a private repository's plan cannot carry, in the same
 way it reports harness drift: the settings are part of the harness, they simply do not
 live in the tree.
 
@@ -377,6 +430,11 @@ live in the tree.
 - **GIVEN** a repository created by the provisioning step
 - **WHEN** a job naming the `release` environment runs from `develop`
 - **THEN** the deployment is refused, and the default token stays read-only
+
+#### Scenario: a pull request is reviewed by Copilot on every push
+- **GIVEN** a repository provisioned with the `copilot_code_review` rule
+- **WHEN** a commit is pushed to a pull request into `develop`
+- **THEN** Copilot reviews it without anyone requesting the review
 
 #### Scenario: a hand-edited setting is reported
 - **GIVEN** a repository whose workflow permissions were widened by hand

@@ -92,10 +92,10 @@ inside the unit pass by accident.
 Such tests SHALL exist only in the repositories that genuinely reach the network —
 `Rest`, the three binding repositories, and `Navigation`. The requirement that
 integration tests skip cleanly without a credential is easy to honour in five
-repositories and becomes empty ceremony in the other thirteen, which have nothing to
+repositories and becomes empty ceremony in the other fourteen, which have nothing to
 call. A mechanism present everywhere and useful nowhere stops being verified.
 
-That the thirteen others have no network test is itself a property: it holds only if
+That the fourteen others have no network test is itself a property: it holds only if
 the portable layer is genuinely isolated from the network, which the executable
 Clean Architecture check already asserts.
 
