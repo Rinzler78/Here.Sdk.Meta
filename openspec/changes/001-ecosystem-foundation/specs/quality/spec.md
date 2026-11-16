@@ -43,8 +43,9 @@ that makes a library shrink in every integrator's Release build.
 `Committed`, `Analyzed` and `OutOfScope`. Each project SHALL choose its value,
 justified by an ADR in its own repository.
 
-- `Committed` — `IsAotCompatible` on the target frameworks that support it, a
-  dedicated trimming test application per library.
+- `Committed` — the project marked `IsTrimmable`, and `IsAotCompatible` on the target
+  frameworks that support it (`net7.0` and later: on `net6.0` that marking switches the
+  trim checks off), a dedicated trimming test application per library.
 - `Analyzed` — analyser enabled, no `IsTrimmable` marking,
   `[RequiresUnreferencedCode]` propagated to the public API.
 - `OutOfScope` — the project is not a trimming subject at all.
