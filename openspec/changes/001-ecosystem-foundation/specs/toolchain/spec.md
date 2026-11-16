@@ -168,8 +168,8 @@ stewardship:
 
 The self-hosted machine SHALL carry the Xamarin column and nothing else. The two
 generations are separated by two major operating system versions, not by two Xcode
-minors: the current .NET 10 iOS servicing release requires Xcode 26.6, which
-requires macOS 26.2, while Xcode 15.4 dates from May 2024. The modern iOS heads
+minors: the current .NET iOS servicing release requires an Xcode that requires a
+macOS two majors above the frozen one, while Xcode 15.4 dates from May 2024. The modern iOS heads
 SHALL therefore build on GitHub-hosted macOS images, which carry the required Xcode.
 
 Neither generation SHALL be moved onto the other's machine. Installing both Xcode
@@ -202,7 +202,8 @@ Self-hosted jobs SHALL be conditioned on
 `github.event.pull_request.head.repo.full_name == github.repository`, and SHALL run
 on `push`, on schedule and on `workflow_dispatch`. The runner SHALL be ephemeral,
 SHALL run under a dedicated macOS account with no access to personal keychains, and
-`pull_request_target` SHALL be forbidden — verified by a check.
+`pull_request_target` SHALL be forbidden — verified by a check — except in
+`promotion.yml`, which `release-flow` requires to run through it from `master`'s own copy.
 
 #### Scenario: a fork pull request never reaches the machine
 - **GIVEN** a pull request opened from a fork
