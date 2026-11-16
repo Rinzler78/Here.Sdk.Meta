@@ -51,9 +51,9 @@ the realisation order is complete.
 - **THEN** it reports the package as unplanned
 
 #### Scenario: an incomplete ecosystem does not fail the audit
-- **GIVEN** realisation has reached phase 4 and eleven packages are published
+- **GIVEN** realisation is part-way and some packages are published
 - **WHEN** the ecosystem audit runs
-- **THEN** it reports eleven of twenty-nine published, without raising a failure
+- **THEN** it reports that many of twenty-nine published, without raising a failure
 
 ### Requirement: The target framework matrix is complete on both layers
 

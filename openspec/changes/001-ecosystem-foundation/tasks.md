@@ -19,15 +19,16 @@ application for a `Committed` library, and its DocFX site. A task whose sample o
 integration test calls HERE finds its credential set requested by 2.4 and stored by
 1.12; the JavaScript key is the exception, requested by 6.1 before its first use. A
 scratch repository named in a Done-when is created by hand in the owner's account,
-public and holding no secret, because rulesets and Pages are unavailable on a private
-repository of the owner's plan; its publish step is stubbed and it is deleted
-afterwards: nothing is ever pushed to nuget.org from one.
+public, because rulesets and Pages are unavailable on a private repository of the
+owner's plan; it holds no real secret, though 1.11d and 1.11e use a throwaway identity;
+its publish step is stubbed and it is deleted afterwards: nothing is ever pushed to
+nuget.org from one. 1.11a and 1.12 also use a private one, to show the private case.
 
 ## Phase 0 — Archive and reset
 
 - [x] 0.1 `git bundle --all` for each of the nine existing GitHub repositories.
-      The local `Here.Sdk.Blazor` directory was never a repository and has no remote;
-      it holds an OpenSpec tree and a pre-commit configuration
+      The local `Here.Sdk.Blazor` directory was never a repository and had no remote;
+      it held an OpenSpec tree and a pre-commit configuration
 - [x] 0.2 Export issues, pull requests and releases via `gh` for each repository
 - [x] 0.3 Present the destruction inventory for explicit authorisation
 - [x] 0.4 Delete the GitHub repositories — **irreversible**
@@ -120,11 +121,8 @@ afterwards: nothing is ever pushed to nuget.org from one.
       Done when: spec and `Rinzler78.Build` use the same three values, and a project
       declaring any other fails the build
 - [ ] 1.8b `Rinzler78.Templates` — the coverage gate: the floor per project, the diff
-      coverage on a pull request, and a failure for a Reduced or Exempt contract without
-      an ADR, test projects excepted: the template declares them Exempt by construction. The gate
-      is a CI check of the template, not a build property.
-      Done when: a scratch project under the floor, and one Exempt without an ADR, each
-      fail their pull request
+      coverage on a pull request.
+      Done when: a scratch project under the floor fails its pull request
 - [ ] 1.8c `Rinzler78.Templates` — the `Committed` trimming measurement written to the
       `README.md`, and the full gate on a pull request into `master`: AOT, measured
       sizes posted on the pull request.
@@ -136,7 +134,7 @@ afterwards: nothing is ever pushed to nuget.org from one.
 - [ ] 1.8d `Rinzler78.Templates` and `Rinzler78.Build` — the Release and Debug
       optimisation properties of `toolchain`: Debug unoptimised with full symbols,
       Release with every optimisation the project supports (R8, AOT, LLVM, WASM AOT,
-      Brotli), the costly ones only in the release workflow, and `AndroidFastDeploymentType`.
+      Brotli), the costly ones never on a feature-branch pull request, and `AndroidFastDeploymentType`.
       The `Rinzler78.Build` part is published by 1.8f.
       Done when: a scratch project's Debug build is unoptimised, its Release build
       enables them, and a feature-branch build skips the costly ones; checked against a
@@ -145,7 +143,8 @@ afterwards: nothing is ever pushed to nuget.org from one.
       against, which Build lacks today: a required README fragment, a rule that no
       `ProjectReference` crosses a repository boundary, an analyser failing a bare
       `double` in the public API of a layer that owns its surface, and an architecture
-      check on the compiled assemblies, a suppression without a written justification, and
+      check on the compiled assemblies, a suppression without a written justification, a Reduced or Exempt coverage contract
+      without an ADR (test projects, Exempt by construction in the templates, excepted), and
       the named platform target-framework sets `package-topology` requires (Xamarin
       monikers, `-android`, `-ios`, Windows, Mac Catalyst), besides the
       `PackageReference` check it has.
@@ -257,10 +256,12 @@ afterwards: nothing is ever pushed to nuget.org from one.
 - [ ] 1.11a `scripts/_provision-forge.sh` — the `copilot_code_review` rule, and an
       idempotent verification mode that reads every setting back and reports drift
       without changing anything. The script carries neither today.
-      The labels of 1.10b are created from the label file, and GitHub Pages is enabled
+      The script reads the repository's visibility and reports the rulesets, the
+      `release` environment and Pages not applicable on a private one; today it calls
+      them unconditionally and fails there. The labels of 1.10b are created from the label file, and GitHub Pages is enabled
       with Actions as its source; the verification mode reads both back.
-      Done when: on a scratch repository the verification mode reports conforming after
-      an apply, and reports a seeded drift; the Toolkit is applied only by 1.11f
+      Done when: on a public scratch repository the verification mode reports conforming
+      after an apply, on a private one it reports those items not applicable, and reports a seeded drift; the Toolkit is applied only by 1.11f
 - [ ] 1.11b `Rinzler78.Templates` and `scripts/_provision-forge.sh` — `promotion.yml`,
       run from `master`'s own copy through `pull_request_target`, refusing any source
       but the repository's `develop`, and the `promotion-source` check required on
@@ -272,8 +273,9 @@ afterwards: nothing is ever pushed to nuget.org from one.
       the identity "is not yet specified". Candidates: a GitHub App installation
       token, a fine-grained token, workflow dispatch from each repository.
       Creating and installing the identity is a portal step only you can take.
-      Done when: an ADR in `Meta` (`ADR-M`) chooses one, names the permissions it holds
-      and how long it lives, `release-flow` states it, and the identity exists
+      Done when: an ADR in `Meta` (`ADR-M`) chooses one, reconciles it with the
+      `release-flow` sentence that calls an application's private key the long-lived
+      credential the flow forbids, names the permissions it holds and how long it lives, `release-flow` states it, and the identity exists
 - [ ] 1.11d `Rinzler78.Templates` — the release workflow notifies `Meta` by
       `repository_dispatch` once it has published, with the identity of 1.11c.
       The payload carries the repository, the package identifiers, the version and the
@@ -281,12 +283,14 @@ afterwards: nothing is ever pushed to nuget.org from one.
       Done when: a publication from a scratch repository raises the dispatch in a scratch
       `Meta`
 - [ ] 1.11e `Rinzler78.Templates` — `lockfile-sync` serves the cascade as well as
-      Renovate: it fires for the cascade's actor and for `global.json`, where the
-      `Rinzler78.Build` SDK is pinned, besides `Directory.Packages.props`, and it pushes
-      with the identity of 1.11c, since a push with `GITHUB_TOKEN` raises no checks.
-      Today it fires only for `renovate[bot]` on `Directory.Packages.props`.
-      Done when: a bump pull request from the cascade's actor on either file gets its
-      lock file regenerated and its required checks run, in a scratch repository
+      Renovate: it fires for the cascade's actor on `Directory.Packages.props`, and it
+      pushes with the identity of 1.11c, since a push with `GITHUB_TOKEN` raises no
+      checks. A bump of the `Rinzler78.Build` pin in `global.json` leaves the lock file
+      unchanged, so that file needs no trigger. Today the workflow fires only for
+      `renovate[bot]`.
+      Done when: a bump pull request from the cascade's actor on
+      `Directory.Packages.props` gets its lock file regenerated and its required checks
+      run, in a scratch repository
 - [ ] 1.11f Publish a version of `Rinzler78.Templates` carrying the template tasks 1.6a
       to 1.11e. The Toolkit is the source of its templates, and `scripts/_sync-template.sh`
       with `scripts/hooks/harness-regenerates.sh` keep it identical to them, so those
@@ -300,6 +304,13 @@ afterwards: nothing is ever pushed to nuget.org from one.
       comes last.
       Done when: the script's verification mode reports the Toolkit conforming, the
       tag publishes, and the dispatch step runs and reaches `Meta`
+- [ ] 1.12a Decision: how a private repository of the extraction publishes `alpha.N`
+      without the `release` environment and the rulesets its plan cannot apply. The
+      runbook shows that a nuget.org policy without an environment lets any ref carrying
+      `release.yml` mint a key. Candidates: upgrade the plan, accept the weaker policy for `alpha.N` under an
+      ADR, or publish prereleases only from public repositories, which amends the
+      `ecosystem-architecture` rule that keeps extraction repositories private.
+      Done when: an ADR in `Meta` (`ADR-M`) chooses one and the runbook states it
 - [ ] 1.12 The repository provisioning procedure, `scripts/_provision-repo.sh` of
       `Rinzler78.Toolkit`, a script outside the templates since it provisions
       repositories and is not part of one:
@@ -311,7 +322,8 @@ afterwards: nothing is ever pushed to nuget.org from one.
       store the cascade identity of 1.11c and the HERE credential sets that exist when it
       runs (2.4 requests them) and belong to it as secrets; the Renovate installation and the identity's write access to
       the repository are portal steps only you can take; wire
-      `Here.Sdk.Build` into every generated `Here.Sdk.*` repository but itself, and add it to `Meta` as a
+      `Here.Sdk.Build` into every generated `Here.Sdk.*` repository but itself once 1.14 has
+      published it, and not for its own provisioning, and add it to `Meta` as a
       submodule under `repos/<name>` tracking `develop`. Visibility follows
       `ecosystem-architecture`: the toolchain repositories are public from creation, the
       others private until extraction is complete; a policy on a private repository is
@@ -325,13 +337,6 @@ afterwards: nothing is ever pushed to nuget.org from one.
       repository is provisioned by hand and no task waits for the others.
       Done when: it has provisioned `Here.Sdk.Build` end to end and a private,
       non-publishing scratch repository, and a second run changes nothing
-- [ ] 1.12a Decision: how a private repository of the extraction publishes `alpha.N`
-      without the `release` environment and the rulesets its plan cannot apply. The
-      runbook shows that a nuget.org policy without an environment lets any ref carrying
-      `release.yml` mint a key. Candidates: publish prereleases only from public
-      repositories, upgrade the plan, or accept the weaker policy for `alpha.N` under
-      an ADR.
-      Done when: an ADR in `Meta` (`ADR-M`) chooses one and the runbook states it
 - [ ] 1.13 `Here.Sdk.Build` — the domain specialisation: the layer vocabulary of the
       eight-layer map, the forbidden dependencies of the inward layers, the required
       analysers, and the HERE non-affiliation fragment, required in `<Description>` and in each package
@@ -389,7 +394,9 @@ afterwards: nothing is ever pushed to nuget.org from one.
       Done when: the validation passes, and the topological order is computed from it
 - [ ] 1.21 `Meta` — NUKE orchestrator skeleton, with its unit tests where it holds
       logic.
-      Done when: its target list runs locally and in CI and its unit tests pass
+      It also hosts the catalogue script of 1.20.
+      Done when: its target list runs locally and in CI, its unit tests pass, and the
+      catalogue validation runs through it
 - [ ] 1.22 `Meta` — the release cascade, receiving side: accept the publishing
       repository's dispatch of 1.11d and poll the flat-container index until the
       version is restorable.
@@ -398,7 +405,8 @@ afterwards: nothing is ever pushed to nuget.org from one.
 - [ ] 1.22a `Meta` — the release cascade, writing side: open the next topological
       wave's bump pull requests, the wave read from the catalogue of 1.20, editing
       `Directory.Packages.props` and `global.json` for the `Rinzler78.Build` SDK pin;
-      the lock file is regenerated by `lockfile-sync` of 1.11e. Wait for green and for
+      the lock file is regenerated by `lockfile-sync` of 1.11e for
+      `Directory.Packages.props`, and a `global.json` bump needs none. Wait for green and for
       publication before the next wave.
       Done when: publishing a `Rinzler78.Build` patch from `Rinzler78.Toolkit` opens a
       green bump pull request in `Here.Sdk.Build` — the first real edge of the graph
@@ -458,7 +466,7 @@ afterwards: nothing is ever pushed to nuget.org from one.
 ## Phase 2 — Native columns, standing alone
 
 - [ ] 2.1 Self-hosted macOS runner: Xcode 15.4 pinned, ephemeral, dedicated account
-      with no keychain access, version verification job, fork-exclusion condition,
+      with no keychain access, version verification job, the fork-exclusion condition of 1.10n,
       `pull_request_target` ban check of 1.10j on the runner's repositories — **before any Xamarin build**. It needs a Mac
       able to run the pinned Xcode, a prerequisite of hardware only you can supply.
       Done when: the verification job reports the pinned version, fails when it moves,
@@ -474,7 +482,8 @@ afterwards: nothing is ever pushed to nuget.org from one.
       step only you can take: one set **per demonstration bundle identifier** for every
       mobile application of the catalogue of 1.20 — `iOS` and `Android` hold two
       applications each, so two sets each, and none is shared — and the server-side
-      key for the `Core`, `Rest` and `Navigation` demonstrations and the integration
+      key for the `Core`, `Rest`, `Navigation` and `Blazor` Server demonstrations, the sets
+      `secrets` assigns the desktop heads, and the integration
       tests. The sets are held outside any repository; the task provisioning a
       repository, through 1.12, stores its own in that repository's GitHub Actions
       secrets.
@@ -521,12 +530,14 @@ afterwards: nothing is ever pushed to nuget.org from one.
 - [ ] 3.7 `Core` — sample: Blazor Server, secrets held server-side, cache visible
 - [ ] 3.8 `iOS` and `Android` — reconcile the native wrappers against the extracted
       contracts.
-      Done when: each adapter of 4.1 can wrap its wrapper without a change to the
-      wrapper's public surface, and the wrapper's tests and samples still pass
+      Done when: each wrapper's public surface is unchanged by the reconciliation, and its
+      tests and samples still pass
 
 ## Phase 4 — Standardisation
 
-- [ ] 4.1 `Standard.Android` and `Standard.iOS` — adapters to the contract
+- [ ] 4.1 `Standard.Android` and `Standard.iOS` — adapters to the contract.
+      Done when: each adapter wraps its wrapper with no change to the wrapper's public
+      surface
 - [ ] 4.2 Samples: `Standard.iOS` on .NET 10 iOS and `Standard.Android` on
       **Xamarin.Android**, sharing one **linked** business-logic file; CI asserts both
       projects resolve the identical path and that no copy exists under `samples/`
@@ -560,7 +571,9 @@ afterwards: nothing is ever pushed to nuget.org from one.
       sample needs the key; its integration tests use the server-side key of 2.4, never
       this one, and the key itself comes from the HERE portal,
       a step only you can take.
-      Done when: the check fails a seeded server-side key in a Pages artefact
+      Its name and rotation date go into the metadata file read by 1.27.
+      Done when: the key is whitelisted to the Pages domain, stored as a secret and
+      entered in that file
 - [ ] 6.2 `Bindings.Js` — pinned Maps API for JavaScript version, C# interop, and its
       API-coverage test; the integration-test project of 1.10
 - [ ] 6.3 `Bindings.Js` — sample: Blazor WASM, raw `H.Map`, no pattern
@@ -601,10 +614,12 @@ afterwards: nothing is ever pushed to nuget.org from one.
       Windows heads — executed once per head by a matrix, Xamarin included, the Xamarin entries disjoint from
       the others so an unavailable runner blocks nothing else.
       Done when: a seeded divergence of one head from the canonical scenario fails that
-      head's entry and no other
+      \1, and the suite is a required check of the pull request
+      into `master` of each repository that owns a head
 - [ ] 8.4 `bUnit` on the Razor components, in `Blazor`; Playwright on the browser
       journeys, in `Meta`.
-      Done when: a seeded regression fails each
+      Done when: a seeded regression fails each, and both are required checks of the
+      pull request into `master`
 - [ ] 8.5 `Rinzler78.Templates` — upgrade merge check, a required check of the binding
       repositories, which keep the decision; `Meta` hosts the canonical scenario it
       runs, and the template version is published and regenerated into each binding
@@ -630,8 +645,12 @@ afterwards: nothing is ever pushed to nuget.org from one.
 - [ ] 10.1 Make each repository taking part in the extraction public, in topological
       order, once the audit reports it conforming; `Meta` and the toolchain
       repositories are public already. A package whose repository is private sends its
-      consumers to a 404, so visibility precedes the stable publication.
-      Done when: no repository remains private
+      consumers to a 404, so visibility precedes the stable publication. Right after
+      each flip, `_provision-forge.sh` applies the rulesets, the `release` environment
+      and Pages, and the trusted-publishing policy is registered or rechecked for the
+      public repository.
+      Done when: no repository remains private, and the verification mode reports each
+      one conforming
 - [ ] 10.2 Publish stable in topological order, one repository at a time, driven by
       the release cascade of 1.22 and 1.22a, and verify a full propagation. A
       repository leaving 0.x first carries its stability ADR.
@@ -647,6 +666,6 @@ afterwards: nothing is ever pushed to nuget.org from one.
       Done when: each submission is filed and each artefact is attached to a release;
       a store's verdict is recorded when it arrives and never blocks this task
 - [ ] 10.4 Publish the gallery of every demonstration and the DocFX site of every
-      repository publishing a package with an API surface, each demonstration linked from the gallery.
+      repository publishing a package with an API surface, each demonstration and each DocFX site linked from the gallery.
       Done when: every site and every demonstration answers on GitHub Pages
 - [ ] 10.5 Promote the deltas of this change into `openspec/specs/` and archive it
