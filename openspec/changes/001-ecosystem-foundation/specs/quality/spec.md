@@ -127,6 +127,17 @@ regress below the current full-run score of the project being modified.
 It SHALL NOT run on the binding packages, whose projections would produce surviving
 mutants with no meaning.
 
+The nightly full run SHALL record each project's score and the badge on an orphan
+`badges` branch of the repository, written without a pull request since no
+integration branch ever merges it; the pull-request run SHALL read that branch as the
+floor of the diff score. An origin that cannot be reached SHALL be an error, never a
+first run, and a repository with no published score has no floor.
+
+#### Scenario: a patch that lowers the score is refused
+- **GIVEN** a project whose last full-run score is 90 %
+- **WHEN** a pull request changes it and its diff scores 85 %
+- **THEN** the pull request fails although 85 % is above the break threshold
+
 #### Scenario: a test that traverses without verifying is caught
 - **GIVEN** a test that calls a method and asserts nothing meaningful
 - **WHEN** Stryker mutates that method

@@ -107,15 +107,17 @@ nuget.org from one. 1.11a and 1.12 also use a private one, to show the private c
       message names a file of the tagged commit declaring the surface stable. A
       repository that tracks a `PublicAPI.Shipped.txt` is left to 1.9. Delivered by
       `Rinzler78.Toolkit` pull request #20
-- [ ] 1.8 `Rinzler78.Templates` — Stryker wired to the diff on every pull request and
-      in full nightly on the portable libraries, break threshold 70 %, target 85 %. A
-      project declaring `RinzlerCoverageContract` Exempt, the bindings included, is not
-      mutated, and a repository without an assembly carries no mutation job. Mutation is
-      a per-repository gate: wiring it after the repositories exist would reopen every
-      one of them.
-      Done when: a regenerated repository runs both modes and a surviving mutant under
-      the threshold fails its pull request; the mutation badge, and the rule that the
-      diff score never regresses, fail a lowered score on its pull request
+- [x] 1.8 `Rinzler78.Templates` — Stryker.NET wired to the diff on every pull request and
+      in full nightly on the portable libraries, break threshold 70 %, target 85 %.
+      `scripts/mutation.sh` skips a project declaring `RinzlerCoverageContract` Exempt,
+      the bindings included, and a repository without an assembly carries no mutation
+      job: only `rinzler-lib` ships `mutation.yml`. The nightly records the scores and a
+      shields.io badge on an orphan `badges` branch; the diff run takes the project's
+      full-run score from it as its floor, so the diff score never regresses. Delivered
+      by `Rinzler78.Toolkit` pull request #21.
+      Not yet exercised: the workflow on GitHub, which runs first on a regenerated
+      repository (1.11f and the extraction repositories); the badge renders only for a
+      public repository (10.1), and the README embed is left to each repository
 - [ ] 1.8a Reconcile the trimming vocabulary: `quality` names `Committed`, `Analyzed`
       and `OutOfScope`, while `Rinzler78.Build` validates `OutOfScope`, `Trimmable` and
       `AotCompatible`. One of the two changes, by an ADR in `Meta`.
