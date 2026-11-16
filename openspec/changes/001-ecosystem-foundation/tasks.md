@@ -144,7 +144,8 @@ nuget.org from one. 1.11a and 1.12 also use a private one, to show the private c
       `ProjectReference` crosses a repository boundary, an analyser failing a bare
       `double` in the public API of a layer that owns its surface, and an architecture
       check on the compiled assemblies, a suppression without a written justification, a Reduced or Exempt coverage contract
-      without an ADR (test projects, Exempt by construction in the templates, excepted), and
+      without an ADR, detected by a project property naming the ADR file (test
+      projects, Exempt by construction in the templates, excepted by `quality`), and
       the named platform target-framework sets `package-topology` requires (Xamarin
       monikers, `-android`, `-ios`, Windows, Mac Catalyst), besides the
       `PackageReference` check it has.
@@ -310,7 +311,9 @@ nuget.org from one. 1.11a and 1.12 also use a private one, to show the private c
       `release.yml` mint a key. Candidates: upgrade the plan, accept the weaker policy for `alpha.N` under an
       ADR, or publish prereleases only from public repositories, which amends the
       `ecosystem-architecture` rule that keeps extraction repositories private.
-      Done when: an ADR in `Meta` (`ADR-M`) chooses one and the runbook states it
+      Done when: an ADR in `Meta` (`ADR-M`) chooses one, the runbook states it and, if the
+      third candidate, the `ecosystem-architecture` rule is amended in the same pull
+      request
 - [ ] 1.12 The repository provisioning procedure, `scripts/_provision-repo.sh` of
       `Rinzler78.Toolkit`, a script outside the templates since it provisions
       repositories and is not part of one:
@@ -323,15 +326,14 @@ nuget.org from one. 1.11a and 1.12 also use a private one, to show the private c
       runs (2.4 requests them) and belong to it as secrets; the Renovate installation and the identity's write access to
       the repository are portal steps only you can take; wire
       `Here.Sdk.Build` into every generated `Here.Sdk.*` repository but itself once 1.14 has
-      published it, and not for its own provisioning, and add it to `Meta` as a
+      published it (the first `Here.Sdk.*` repository after it checks this), and add it to `Meta` as a
       submodule under `repos/<name>` tracking `develop`. Visibility follows
       `ecosystem-architecture`: the toolchain repositories are public from creation, the
       others private until extraction is complete; a policy on a private repository is
       pending, and lapses after seven days if nothing is published, so it is registered
-      at the first `alpha.N`. The owner's plan offers no rulesets, environments or Pages on a private repository:
-      those settings are applied only when a repository is public, and the verification
-      mode reports them not applicable while it is private; the local harness hooks
-      stand in until then. The self-hosted runner is registered on each Xamarin
+      at the first `alpha.N`. The settings that need a public repository follow the visibility handling of 1.11a;
+      the local harness hooks stand in until the flip of 10.1, and the prerelease path
+      of a private repository is the decision of 1.12a. The self-hosted runner is registered on each Xamarin
       repository, a portal step. Every
       repository task below starts from it, so no
       repository is provisioned by hand and no task waits for the others.
@@ -458,7 +460,8 @@ nuget.org from one. 1.11a and 1.12 also use a private one, to show the private c
       integrity and dead deny rules, harness drift, and version literals in
       specifications — a requirement naming a concrete version that is not one of the
       two declared freezes is reported, dated store facts, target framework generations and
-      rationale quoted in `design.md` being the exempt class, written in the audit's
+      rationale quoted in `design.md`, and the version a requirement quotes as the reason
+      for a choice, being the exempt class, written in the audit's
       configuration; the layer assignment of each package; that no repository holds a
       registry key; and the deliberate absence of `CODEOWNERS`.
       Done when: each check has a failing and a passing fixture
@@ -482,8 +485,7 @@ nuget.org from one. 1.11a and 1.12 also use a private one, to show the private c
       step only you can take: one set **per demonstration bundle identifier** for every
       mobile application of the catalogue of 1.20 — `iOS` and `Android` hold two
       applications each, so two sets each, and none is shared — and the server-side
-      key for the `Core`, `Rest`, `Navigation` and `Blazor` Server demonstrations, the sets
-      `secrets` assigns the desktop heads, and the integration
+      key for the `Core`, `Rest`, `Navigation` and `Blazor` Server demonstrations, and the integration
       tests. The sets are held outside any repository; the task provisioning a
       repository, through 1.12, stores its own in that repository's GitHub Actions
       secrets.
@@ -528,16 +530,16 @@ nuget.org from one. 1.11a and 1.12 also use a private one, to show the private c
       demonstrably running with no HERE credential
 - [ ] 3.6 `Core` — extracted from both natives: credentials, cache, logging, resilience
 - [ ] 3.7 `Core` — sample: Blazor Server, secrets held server-side, cache visible
-- [ ] 3.8 `iOS` and `Android` — reconcile the native wrappers against the extracted
-      contracts.
-      Done when: each wrapper's public surface is unchanged by the reconciliation, and its
-      tests and samples still pass
+- [ ] 3.8 `iOS` and `Android` — verify the native wrappers against the extracted
+      contracts: a public change of a wrapper needs an ADR.
+      Done when: the wrappers' tests and samples still pass against the extracted
+      contracts, and every public change carries an ADR
 
 ## Phase 4 — Standardisation
 
 - [ ] 4.1 `Standard.Android` and `Standard.iOS` — adapters to the contract.
       Done when: each adapter wraps its wrapper with no change to the wrapper's public
-      surface
+      surface, and the wrapper's tests and samples still pass
 - [ ] 4.2 Samples: `Standard.iOS` on .NET 10 iOS and `Standard.Android` on
       **Xamarin.Android**, sharing one **linked** business-logic file; CI asserts both
       projects resolve the identical path and that no copy exists under `samples/`
@@ -613,13 +615,13 @@ nuget.org from one. 1.11a and 1.12 also use a private one, to show the private c
       an Appium adapter for the Apple and Android heads and a FlaUI adapter for the
       Windows heads — executed once per head by a matrix, Xamarin included, the Xamarin entries disjoint from
       the others so an unavailable runner blocks nothing else.
-      Done when: a seeded divergence of one head from the canonical scenario fails that
-      \1, and the suite is a required check of the pull request
-      into `master` of each repository that owns a head
+      Done when: a seeded divergence of one head from the canonical scenario fails that head's entry and no other, and the suite is wired into the workflow of
+      the pull request into `master` of each repository that owns a head, a required
+      check once that repository is public (10.1)
 - [ ] 8.4 `bUnit` on the Razor components, in `Blazor`; Playwright on the browser
       journeys, in `Meta`.
-      Done when: a seeded regression fails each, and both are required checks of the
-      pull request into `master`
+      Done when: a seeded regression fails each, and both are wired into the workflow of the pull request into `master` of their
+      repository, required checks once it is public (10.1)
 - [ ] 8.5 `Rinzler78.Templates` — upgrade merge check, a required check of the binding
       repositories, which keep the decision; `Meta` hosts the canonical scenario it
       runs, and the template version is published and regenerated into each binding

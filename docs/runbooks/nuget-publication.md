@@ -71,7 +71,8 @@ or the release workflow does not carry them yet.
 - the not-applicable report on a private repository (1.11a).
 
 On the owner's plan, rulesets, environments and Pages exist only on a public repository,
-so the script applies them there and reports them not applicable on a private one.
+so the script will apply them there and report them not applicable on a private one
+(pending, task 1.11a).
 
 The settings:
 

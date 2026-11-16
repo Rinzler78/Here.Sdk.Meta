@@ -95,7 +95,8 @@ Mutation testing does not apply to it either — a projection produces surviving
 mutants with no meaning — so its guarantee comes from the binding's API-coverage
 test, which reflects over the bound assembly and fails when a public upstream type
 is not projected. A project declaring
-`Reduced` or `Exempt` without an ADR SHALL fail the build, and a `Reduced` floor
+`Reduced` or `Exempt` without an ADR SHALL fail the build, a test project excepted since
+the templates declare it `Exempt` by construction, and a `Reduced` floor
 SHALL NOT be lowered without a new ADR superseding the previous one.
 
 Without this mechanism a uniform 90 % floor is unreachable on the binding
