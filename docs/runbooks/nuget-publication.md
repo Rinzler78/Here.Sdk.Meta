@@ -67,7 +67,7 @@ or the release workflow, and are marked *pending*:
 - the Copilot rule (task 1.11a of `001-ecosystem-foundation`), *pending*;
 - `promotion-source` (1.11b), *pending*;
 - the domain reviewers (1.11), *pending*;
-- the release checks of the tag (1.7 and 1.9), *pending*;
+- the release check of a package with a public API surface (1.9), *pending*;
 - the not-applicable report on a private repository (1.11a), *pending*.
 
 On the owner's plan, rulesets, environments and Pages exist only on a public repository,
@@ -169,9 +169,13 @@ window; a public repository's policy is active immediately.
    `git diff "${previous:-$(git hash-object -t tree /dev/null)}" origin/master -- '*PublicAPI.Unshipped.txt'`,
    against the empty tree before the first release. **1.0.0 after a 0.x version** is
    accepted only with an ADR of the repository declaring its public surface stable:
-   add that ADR's path to the message; without it the release check refuses 1.0.0 —
-   *pending*: neither `_release-tag.sh` nor `release.yml` carries that check yet
-   (tasks 1.7 and 1.9).
+   add that ADR's path to the message; without it the release check refuses 1.0.0.
+   For a package with no public API surface, `release.yml` runs
+   `scripts/_release-version.sh` right after the tag check: the version must be the one
+   the Conventional Commits since the last stable tag require, and the message must
+   carry the subject of each deciding commit, which the `git log` line above produces.
+   For a package with a surface the version belongs to the surface diff — *pending*:
+   no workflow carries that check yet (task 1.9).
 
    The push publishes, directly. There is no draft and no second gesture: the tag check,
    the immutable tags and the promotion pull request are what bound an irreversible push.

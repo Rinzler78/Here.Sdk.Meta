@@ -96,17 +96,17 @@ nuget.org from one. 1.11a and 1.12 also use a private one, to show the private c
       `scripts/sync-skills.sh` refreshes them and commits the result, and the check
       `skills-are-vendored` keeps both directories identical. `resolving-merge-conflicts`
       is not vendored: its upstream removed it in v1.3.0, so the set is sixteen
-- [ ] 1.7 `Rinzler78.Templates` — release check for packages with no public API surface — the toolchain's
-      props/targets packages and template pack: refuse a tag whose version disagrees
-      with the Conventional Commits since the previous tag — `!` or a `BREAKING
-      CHANGE` footer breaking (minor before 1.0.0), `feat` minor, `fix` and `perf`
-      patch, other types no effect, the strongest effect deciding, no release for a
-      range with none — and require the annotated tag's message to carry the evidence
-      the proposal cited; 1.0.0 after a 0.x version when, and only when, the ADR
-      declaring the surface stable exists, whatever the commits.
-      Done when: a scratch repository refuses a tag of each wrong effect and accepts
-      the right one, and the check runs in the release workflow before the credential
-      is requested
+- [x] 1.7 `Rinzler78.Templates` — release check for packages with no public API surface,
+      the toolchain's props/targets packages and template pack. `release.yml` runs
+      `scripts/_release-version.sh` after the tag check and before any credential: it
+      refuses a tag whose version disagrees with the Conventional Commits since the last
+      stable tag (`!` or a `BREAKING CHANGE` footer breaking, a minor before 1.0.0;
+      `feat` minor; `fix` and `perf` patch; other types no effect; the strongest effect
+      deciding; no release for a range with none), requires the annotated tag's message
+      to carry each deciding commit, and accepts 1.0.0 after a 0.x version only when the
+      message names a file of the tagged commit declaring the surface stable. A
+      repository that tracks a `PublicAPI.Shipped.txt` is left to 1.9. Delivered by
+      `Rinzler78.Toolkit` pull request #20
 - [ ] 1.8 `Rinzler78.Templates` — Stryker wired to the diff on every pull request and
       in full nightly on the portable libraries, break threshold 70 %, target 85 %. A
       project declaring `RinzlerCoverageContract` Exempt, the bindings included, is not
