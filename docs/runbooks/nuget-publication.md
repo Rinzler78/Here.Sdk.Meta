@@ -157,7 +157,10 @@ window; a public repository's policy is active immediately.
    ```bash
    git fetch origin --tags
    # Empty before a repository's first release: the log then covers all history.
-   previous=$(git describe --tags --abbrev=0 origin/master 2>/dev/null || true)
+   # The last *stable* tag, as the release check reads it: a nearer prerelease tag
+   # would narrow the range and drop a deciding commit from the message.
+   previous=$(git tag --merged origin/master --list 'v[0-9]*' --sort=-version:refname |
+     grep -E '^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$' | head -n1 || true)
    # Subjects and bodies: a BREAKING CHANGE footer is evidence too.
    { echo v0.2.0; echo; git log --no-merges --format='- %s%n%b' "${previous:+$previous..}origin/master"; } |
      git tag --sign --annotate v0.2.0 --file - origin/master
