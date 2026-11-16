@@ -55,7 +55,9 @@ request and the status checks, with signed commits and blocked force-push and
 deletion, administrators included — without bypass.
 
 - `develop` SHALL accept squashed pull requests only, with a linear history.
-- `master` SHALL accept pull requests from this repository's `develop` only. No ruleset
+- `master` SHALL accept pull requests from this repository's `develop` only; a hotfix
+  branches from `master`, merges into `develop` by pull request and reaches `master` by
+  the next promotion, like any other change. No ruleset
   can restrict a source branch, so a required check, `promotion-source`, SHALL enforce
   it — run through `pull_request_target`, from the base branch's own copy of the
   workflow and without checking out the pull request, so that no pull request can
@@ -73,7 +75,7 @@ deletion, administrators included — without bypass.
 Required status checks SHALL be bound to the GitHub Actions integration, since a check
 required by name alone is satisfied by any integration posting that name. They SHALL
 be the build, static quality, and two automated domain reviewers, each with a defined
-assertion:
+assertion, and, for `master` alone, `promotion-source`:
 
 | Reviewer | Asserts |
 |---|---|
@@ -81,8 +83,8 @@ assertion:
 | `package-api-reviewer` | The `PublicAPI.Unshipped.txt` diff matches the version intent — no removed or changed public member without the `!` commit prefix, the `breaking-change` label and the breaking bump together: a major from 1.0.0 onwards, a minor before. |
 
 The domain reviewers join the required checks when they exist. Until then the required
-checks are the build and static quality alone: the `verify` and `lint` jobs of the
-harness.
+checks are the build and static quality, the `verify` and `lint` jobs of the
+harness, and `promotion-source` on `master`.
 
 Required human approvals SHALL be **zero**, the author being the sole maintainer;
 the gate is the machine, not a signature.
@@ -122,7 +124,9 @@ patch; every other type — `chore`, `docs`, `refactor`, `test`, `build`, `ci`, 
 with no effect calls for no release.
 
 A proposed release version SHALL cite its evidence — the surface diff, the commits, or
-the stability ADR — and the annotated tag's message SHALL carry it. A build of an untagged
+the stability ADR — and the annotated tag's message SHALL carry it. The release
+workflow SHALL verify that evidence before it builds and refuse a tag whose version,
+stability ADR or message lacks it: this is the release check. A build of an untagged
 commit SHALL carry a prerelease version computed from the last tag and the number of
 commits since it, its height — `1.2.1-alpha.0.3` three commits after `v1.2.0`,
 `1.2.0-rc.1.3` three commits after `v1.2.0-rc.1` — and is never published.
@@ -130,8 +134,26 @@ commits since it, its height — `1.2.1-alpha.0.3` three commits after `v1.2.0`,
 #### Scenario: a breaking change cannot ship as a patch
 - **GIVEN** a pull request removing a public member
 - **WHEN** `package-api-reviewer` compares `PublicAPI.Unshipped.txt`
-- **THEN** it fails unless the commit carries `!` and the issue carries
-  `breaking-change`
+- **THEN** it fails unless the commit carries `!`, the issue carries
+  `breaking-change` and the proposed version is the breaking bump: a major from 1.0.0
+  onwards, a minor before it, so `0.4.2` becomes `0.5.0`
+
+#### Scenario: 1.0.0 needs the stability ADR
+- **GIVEN** a proposed `1.0.0` after `0.9.0`, and no ADR declaring the surface stable
+- **WHEN** the release check runs
+- **THEN** it refuses the tag, and accepts it once the ADR exists
+
+#### Scenario: a package with no public API takes its version from the commits
+- **GIVEN** a props/targets package whose commits since the last tag are `docs` and `fix`
+- **WHEN** its version is proposed
+- **THEN** the version is a patch, and a range of `chore` commits alone calls for no
+  release
+
+#### Scenario: a pull request into master must come from develop
+- **GIVEN** a pull request into `master` whose source is a `feature/` branch
+- **WHEN** `promotion-source` runs
+- **THEN** it fails, and it passes for a pull request from `develop`
+- **AND** a hotfix reaches `master` through `develop` like any other change
 
 ### Requirement: Issue templates make triage possible
 
@@ -379,11 +401,14 @@ At minimum:
   cascade opens its bump pull requests in other repositories, which no repository's
   `GITHUB_TOKEN` can reach whatever this switch says; the identity the cascade writes
   with is decided with the cascade itself, and is not yet specified.
-- **The `release` environment SHALL admit tags `v*` only.** A trusted publishing policy
+- **Wherever the owner's plan allows rulesets, environments and Pages** —
+  `ecosystem-architecture` states the private-repository case, where the audit reports
+  them not applicable — **the `release` environment SHALL admit tags `v*` only.** A trusted publishing policy
   matches the workflow's file name and the environment, never the ref, and GitHub
   silently creates an unprotected environment the first time a job names one. Any other
   deployment policy SHALL be removed, not merely outnumbered.
-- **The rulesets of `Blocking checks are automated` SHALL be applied** — both
+- **The rulesets of `Blocking checks are automated` SHALL be applied**, under the same
+  condition — both
   long-lived branches, the immutable release tags, and their creation by administrators.
 - **Copilot SHALL review every push** to a pull request into either long-lived branch,
   through the ruleset's `copilot_code_review` rule, so that the review loop of
@@ -392,7 +417,8 @@ At minimum:
 The provisioning step is `scripts/_provision-forge.sh`, delivered by the template and
 idempotent.
 
-The audit SHALL report a repository whose forge settings diverge from these, in the same
+The audit SHALL report a repository whose forge settings diverge from these, except
+what a private repository's plan cannot carry, in the same
 way it reports harness drift: the settings are part of the harness, they simply do not
 live in the tree.
 
@@ -400,6 +426,11 @@ live in the tree.
 - **GIVEN** a repository created by the provisioning step
 - **WHEN** a job naming the `release` environment runs from `develop`
 - **THEN** the deployment is refused, and the default token stays read-only
+
+#### Scenario: a pull request is reviewed by Copilot on every push
+- **GIVEN** a repository provisioned with the `copilot_code_review` rule
+- **WHEN** a commit is pushed to a pull request into `develop`
+- **THEN** Copilot reviews it without anyone requesting the review
 
 #### Scenario: a hand-edited setting is reported
 - **GIVEN** a repository whose workflow permissions were widened by hand

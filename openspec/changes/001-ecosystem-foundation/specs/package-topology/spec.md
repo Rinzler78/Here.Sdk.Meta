@@ -14,8 +14,8 @@ SHALL remain `Here.Sdk.*`. Only `<PackageId>` carries the prefix.
 
 ### Requirement: The ecosystem is nineteen repositories and twenty-nine packages
 
-The ecosystem SHALL consist of exactly nineteen repositories publishing exactly
-twenty-nine packages, as enumerated below. Any addition or removal SHALL require
+The ecosystem SHALL consist of exactly nineteen repositories, eighteen of them
+publishing exactly twenty-nine packages, as enumerated below. Any addition or removal SHALL require
 an OpenSpec change.
 
 | Repository | Packages |

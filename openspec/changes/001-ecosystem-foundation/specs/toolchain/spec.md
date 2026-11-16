@@ -128,13 +128,17 @@ dependency-freshness gate that requires those bumps to land unattended. A
 specification that has to be edited to stay true is a specification that will stop
 being true.
 
-Two exceptions SHALL hold, and both are deliberate freezes rather than current
-values: the HERE SDK artefacts pinned per column, whose raise is a proposal by
+Two freezes SHALL hold, both deliberate rather than current values: the HERE SDK artefacts pinned per column, whose raise is a proposal by
 design, and the frozen Xamarin toolchain with its pinned Xcode. A version that is
 itself the decision belongs in the specification; a version that merely happens to
 be the latest does not. Dated facts of a store's policy, target framework generations, the rationale quoted in `design.md` and the version a
 requirement quotes as the reason for a choice are not versions of a dependency, and
 the audit exempts them.
+
+#### Scenario: a quoted version passes the audit
+- **GIVEN** a requirement quoting a version as the reason for a choice
+- **WHEN** the audit scans the specifications for version literals
+- **THEN** that literal is not reported, and a literal naming a dependency's current version is reported
 
 #### Scenario: a routine bump does not touch the specification
 - **GIVEN** Renovate raises the assertion library by one minor version

@@ -15,7 +15,7 @@ demonstrated separately, because what each proves is different.
 
 | Exempt package | Why |
 |---|---|
-| `Rinzler78.Build` | A props/targets package; its demonstration is that nineteen repositories import it and behave identically in IDE and CI. |
+| `Rinzler78.Build` | A props/targets package; its demonstration is that the repositories import it and behave identically in IDE and CI. |
 | `Abstractions`, `.Navigation`, `.Offline` | Contracts with no implementation; demonstrated through `Abstractions.Testing`, which fakes all three. |
 | `Presentation.Mvp`, `.Mvvm`, `.Android`, `.iOS` | Pattern adapters; demonstrated through the native and cross-platform samples that consume them. |
 | `Rinzler78.Templates` | A `dotnet new` template pack; its demonstration is that the harness regenerates from it byte-identically. |

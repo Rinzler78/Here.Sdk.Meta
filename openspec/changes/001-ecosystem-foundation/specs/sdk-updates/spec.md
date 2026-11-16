@@ -143,6 +143,12 @@ Propagation therefore takes three shapes, selected by the verdict:
 - **THEN** the cascade opens bump pull requests that merge on green
 - **AND** no proposal is opened in any repository above
 
+#### Scenario: an additive diff publishes a minor and proposes nothing above
+- **GIVEN** an SDK upgrade whose `PublicAPI.Unshipped.txt` diff only adds members
+- **WHEN** the binding publishes
+- **THEN** the version is a minor and the cascade proceeds as for an empty diff
+- **AND** no proposal is opened in any repository above
+
 #### Scenario: a downstream repository decides for itself
 - **GIVEN** a binding publishes a breaking bump — a major from 1.0.0 onwards, a minor
   before — after a member was removed or reshaped

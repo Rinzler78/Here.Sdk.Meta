@@ -57,7 +57,7 @@ points SHALL refer to it. It SHALL state the delivery loop an agent follows with
 asking — local review of code, tests and documentation alike, the forge's review,
 every finding fixed or refuted with evidence and reviewed again, and a pull request
 green only when no finding is open, no merge conflict exists and the required checks
-pass — the release procedure from the version proposal to the indexed package, and
+pass — the release procedure from the version proposal to the indexed package, which a repository publishing nothing, such as `Here.Sdk.Meta`, reads as not applicable, and
 the exhaustive list of points where an agent stops and asks: a release tag not
 approved, anything on the package registry account, a decision contradicting a
 written rule, and a lazy mechanism. A rule that lived only in an agent's session

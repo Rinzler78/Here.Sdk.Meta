@@ -14,7 +14,7 @@ cannot satisfy:
 |---|---|
 | `Here.Sdk.Meta` | Publishes no package. Its only code is the NUKE orchestrator, verified by the cascade actually propagating, and by its own unit tests where it has logic. |
 | `Here.Sdk.Build` | Ships a props/targets package declaring the domain's layer vocabulary and non-affiliation fragment. Its verification is that a project violating either cannot build, exercised by a scratch consumer. |
-| `Rinzler78.Toolkit` | Ships a props/targets package and a `dotnet new` template pack, neither of which produces an assembly with a public API. Its verification is that it regenerates its own harness byte-identically, and that nineteen repositories import it and behave identically in IDE and CI. |
+| `Rinzler78.Toolkit` | Ships a props/targets package and a `dotnet new` template pack, neither of which produces an assembly with a public API. Its verification is that it regenerates its own harness byte-identically, and that the repositories import it and behave identically in IDE and CI. |
 
 Every other gate — analysers, warnings as errors, English, pre-commit, linear
 history, specification validation — SHALL apply to **all** repositories, these two
