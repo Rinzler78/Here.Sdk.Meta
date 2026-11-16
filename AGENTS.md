@@ -48,7 +48,7 @@
 
 ## Memory Management
 
-- Project docs, memory, specs, and plans live in `aidd_docs/`.
+- Project memory lives in `aidd_docs/`; specifications and tasks live in `openspec/`.
 - Read only task-relevant context and linked memory files; complete required reads.
 
 <!-- aidd_project_memory:start -->

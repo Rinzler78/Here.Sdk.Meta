@@ -24,5 +24,5 @@
 
 ## Agent may
 
-- AI should auto commit: after task done.
+- Commit after each finished task, signed.
 - Push a feature branch and open a pull request. Never commit or push directly to `develop` or `master`.

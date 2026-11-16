@@ -42,5 +42,5 @@
 
 ```mermaid
 flowchart LR
-  Natives --> Contracts --> Facade --> Presentation --> Demonstrations
+  Natives --> Contracts --> Services --> Presentation --> Adapters --> Facade --> Heads --> Demonstrations
 ```
