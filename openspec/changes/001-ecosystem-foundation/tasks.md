@@ -88,12 +88,14 @@ nuget.org from one. 1.11a and 1.12 also use a private one, to show the private c
       bot-driven release flow, since replaced; the next patch was published on 2026-09-27 from
       a signed tag. The procedure and its traps are in
       `docs/runbooks/nuget-publication.md`
-- [ ] 1.6a Vendor the seventeen skills of `agent-harness` from their public upstream
+- [x] 1.6a Vendor the sixteen skills of `agent-harness` from their public upstream
       into `.agents/skills/` and `.claude/skills/` of `Rinzler78.Toolkit`, and into the
-      three templates through the shared harness directory (Toolkit issue #1). The
-      boxes of 1.1 and 1.3 do not claim them.
-      Done when: both skill directories hold the seventeen, byte-identical, and a
-      regenerated repository carries them
+      three templates through the shared harness directory (Toolkit issue #1, closed by
+      its pull request #19). Thirteen come from `mattpocock/skills` and three from
+      `obra/superpowers`, each pinned to a full commit in `scripts/skills.manifest`;
+      `scripts/sync-skills.sh` refreshes them and commits the result, and the check
+      `skills-are-vendored` keeps both directories identical. `resolving-merge-conflicts`
+      is not vendored: its upstream removed it in v1.3.0, so the set is sixteen
 - [ ] 1.7 `Rinzler78.Templates` — release check for packages with no public API surface — the toolchain's
       props/targets packages and template pack: refuse a tag whose version disagrees
       with the Conventional Commits since the previous tag — `!` or a `BREAKING

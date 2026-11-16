@@ -13,14 +13,15 @@ The network remains necessary for what the network legitimately owns: restoring
 packages, downloading the SDK during `setup-env`, and querying advisory databases.
 Self-containment is about the harness, not about isolation from nuget.org.
 
-Seventeen skills SHALL be committed in each repository, physically duplicated in
+Sixteen skills SHALL be committed in each repository, physically duplicated in
 `.agents/skills/` and `.claude/skills/`.
 
 The set SHALL be exactly: `ask-matt`, `improve-codebase-architecture`,
 `setup-matt-pocock-skills`, `setup-pre-commit`, `to-questionnaire`, `to-spec`,
 `to-tickets`, `triage`, `wait-what`, `writing-for-agents`, `tdd`, `code-review`,
 `verification-before-completion`, `using-git-worktrees`, `diagnosing-bugs`,
-`resolving-merge-conflicts`, `finishing-a-development-branch`.
+`finishing-a-development-branch`. A skill whose upstream no longer exists is not part of
+the set: `resolving-merge-conflicts` was removed upstream and was dropped.
 
 Content SHALL come from the public upstream and SHALL be committed, never fetched
 at run time. A repository-local command SHALL refresh them from upstream **and
@@ -28,6 +29,12 @@ commit the result**, so an update is a reviewable pull request rather than a sil
 mutation. Symbolic links SHALL NOT be used: without
 Developer Mode, a Windows checkout degrades them into text files containing the
 target path.
+
+#### Scenario: a skill update is a reviewable change
+- **GIVEN** a feature branch of a repository
+- **WHEN** the refresh command runs
+- **THEN** both skill directories are rewritten from the commits pinned in the manifest and the result is committed
+- **AND** the check fails if the directories diverge, hold a skill the manifest does not name, or contain a symbolic link
 
 #### Scenario: a repository cloned alone is fully operational
 - **GIVEN** a fresh clone of any repository, with no other repository present
@@ -45,7 +52,7 @@ that no agent depends on another's configuration:
 | `AGENTS.md` | Codex and cross-agent entry point, carrying the same content |
 | `.claude/settings.json` | permissions, hooks, status line, environment |
 | `.claude/agents/`, `.claude/commands/` | the repository's domain reviewers and commands |
-| `.agents/skills/`, `.claude/skills/` | the seventeen vendored skills |
+| `.agents/skills/`, `.claude/skills/` | the sixteen vendored skills |
 | `WORKFLOW.md` | how work is delivered and released, and where an agent stops and asks |
 
 `CLAUDE.md` and `AGENTS.md` SHALL stay in agreement; a check SHALL fail the build if
