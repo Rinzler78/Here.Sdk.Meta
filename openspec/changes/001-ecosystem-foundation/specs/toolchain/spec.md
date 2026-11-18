@@ -86,17 +86,23 @@ be installed by a script, and `setup-env` SHALL verify it and fail with instruct
 
 ### Requirement: Release enables every optimisation the project supports
 
-Debug SHALL serve diagnosability: no optimisation, full symbols,
-`AndroidFastDeploymentType=AssembliesOnly`, Hot Reload.
+Debug SHALL serve diagnosability: no optimisation, full symbols, Hot Reload, and
+assemblies-only fast deployment on Android — `AndroidFastDeploymentType=Assemblies`
+on Xamarin.Android, where the property exists, and the SDK's own fast deployment on
+.NET for Android, which removed that property in .NET 9.
 
-Release SHALL enable everything the project can enable — full R8 and profiled AOT on
-Android, AOT and LLVM on iOS, WASM AOT and Brotli on Blazor, ReadyToRun or Native AOT
-on server demonstrations, deterministic build, SourceLink, symbol packages, and
-warnings as errors on every project — samples included, per `coding-principles`.
+Release SHALL enable everything the project can enable — R8 shrinking and profiled
+AOT on Android, AOT and LLVM on iOS, WASM AOT and compression (Brotli) on Blazor,
+ReadyToRun or Native AOT on server demonstrations, deterministic build, SourceLink,
+symbol packages, and warnings as errors on every project — samples included, per
+`coding-principles`. Each is set under the property name its platform gives it, and a
+value the project sets is kept.
 
-Costly optimisations — WASM AOT, Android profiled AOT, iOS LLVM — SHALL NOT run on
-`feature/*` pull requests; they run on the pull request to `master`, on the nightly
-job, and on release.
+Costly optimisations — WASM AOT, Android AOT and profiled AOT, iOS LLVM — SHALL NOT
+run on `feature/*` pull requests; they are switched by one property,
+`RinzlerCostlyOptimisations`, which the generated continuous integration turns off
+unless the pull request targets `master`. They run on the pull request to `master`,
+on the nightly job, and on release.
 
 #### Scenario: a fast pull request is still a faithful one
 - **GIVEN** a pull request on a feature branch
