@@ -92,7 +92,7 @@ on Xamarin.Android, where the property exists, and the SDK's own fast deployment
 .NET for Android, which removed that property in .NET 9.
 
 Release SHALL enable everything the project can enable — R8 shrinking and profiled
-AOT on Android, AOT and LLVM on iOS, WASM AOT and compression (Brotli) on Blazor,
+AOT on Android, AOT (the device default) and LLVM on iOS, WASM AOT and compression (Brotli) on Blazor,
 ReadyToRun or Native AOT on server demonstrations, deterministic build, SourceLink,
 symbol packages, and warnings as errors on every project — samples included, per
 `coding-principles`. Each is set under the property name its platform gives it, and a
