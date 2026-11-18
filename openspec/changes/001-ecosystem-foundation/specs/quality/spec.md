@@ -74,8 +74,10 @@ default, `full`, trims every assembly and shows marking no benefit) with and wit
 the library marked. The sizes are recorded by a local `--write`: CI holds a token that
 cannot commit. The promotion pull request into `master` SHALL re-measure, compile the
 application ahead of time, post the sizes on the pull request, and fail when the marked
-library exceeds the record by more than 5 %, when marking trims nothing, or when the
-record is absent or unreadable. The payload is recorded as information and does not
+library exceeds the record by more than 5 %, when marking trims nothing, when the
+record is absent or unreadable, when a `Committed` library has no trimming test
+application or its application does not publish, or when the application cannot be
+compiled ahead of time. The payload is recorded as information and does not
 gate: five percent of a framework is a hundred times a library. A WASM payload or an
 IPA size belongs to the head that builds one.
 

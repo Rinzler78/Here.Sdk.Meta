@@ -327,7 +327,10 @@ nuget.org from one. 1.11a and 1.12 also use a private one, to show the private c
       since the script requires `promotion-source` and the reviewer checks; and the tag
       comes last.
       Done when: the script's verification mode reports the Toolkit conforming, the
-      tag publishes, and the dispatch step runs and reaches `Meta`
+      tag publishes, and the dispatch step runs and reaches `Meta`; and a scratch
+      repository generated from the published templates runs the pull-request gates of
+      1.8b and 1.8c once, the second with a `Committed` library whose sizes are posted on
+      its promotion pull request and whose regression fails it
 - [ ] 1.12a Decision, taken before 1.12 because 1.12 relies on it: how a private repository of the extraction publishes `alpha.N`
       without the `release` environment and the rulesets its plan cannot apply. The
       runbook shows that a nuget.org policy without an environment lets any ref carrying
