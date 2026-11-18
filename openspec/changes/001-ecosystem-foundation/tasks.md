@@ -172,24 +172,40 @@ nuget.org from one. 1.11a and 1.12 also use a private one, to show the private c
       request targets `master`; the library pull requests do not package an application,
       so they take effect where one is built. Delivered by `Rinzler78.Toolkit` pull
       request #25
-- [ ] 1.8e `Rinzler78.Build` — the generic mechanisms `Here.Sdk.Build` (1.13) declares
+- [x] 1.8e `Rinzler78.Build` — the generic mechanisms `Here.Sdk.Build` (1.13) declares
       against, which Build lacks today: a required README fragment, a rule that no
-      `ProjectReference` crosses a repository boundary, an analyser failing a bare
+      `ProjectReference` crosses a repository boundary, a check failing a bare
       `double` in the public API of a layer that owns its surface, and an architecture
       check on the compiled assemblies, a suppression without a written justification, a Reduced or Exempt coverage contract
-      without an ADR, detected by a project property naming the ADR file (test
-      projects, Exempt by construction in the templates, excepted by `quality`), and
+      without an ADR, detected by a project property naming the ADR file (excepted by `quality`
+      for a project shipping no package: a test project, a trimming application), and
       the named platform target-framework sets `package-topology` requires (Xamarin
       monikers, `-android`, `-ios`, Windows, Mac Catalyst), besides the
       `PackageReference` check it has.
       Done when: a scratch consumer violating each fails the build, and a project
-      declaring no policy still builds
+      declaring no policy still builds.
+      Proven by scratch consumers, one per rule, each refused with a message naming the
+      file, rule or reference, and by one end-to-end build against the packed
+      `Rinzler78.Build`. The two checks on compiled output read assembly metadata through
+      a precompiled MSBuild task shipped under `build/tasks/`, not a Roslyn analyser: no
+      compiler version to match on the Xamarin heads. A bare `double` is refused anywhere
+      in the signature of a public or protected member, generics, tuples and arrays
+      included, except in the types and namespaces a layer allows; the forbidden
+      references are the layer's `RinzlerForbiddenDependency` names, read from the
+      assembly's own references. The exemption from the ADR rule is widened from test
+      projects to every project shipping no package, because the trimming application
+      of 1.8c is `Exempt` without being a test project; `quality` says so. Not proven:
+      the task has not loaded under Visual Studio MSBuild or Mono, the hosts of the
+      Xamarin heads, so 1.8f owns that check. Delivered by `Rinzler78.Toolkit` pull
+      requests #26, #27 and #28
 - [ ] 1.8f Publish `Rinzler78.Build` carrying 1.8a, 1.8d and 1.8e, then bump its pin in
       the template's `global.json`, so the Templates published by 1.11f consume it.
       Every Toolkit tag publishes both packages at its version, so this also publishes
       `Rinzler78.Templates` as it stands, and 1.11f republishes Build.
       Done when: the pin names the published version, a regenerated repository builds
-      against it, and the checks of 1.8c and 1.8d pass against it
+      against it, the checks of 1.8c and 1.8d pass against it, and the task of 1.8e
+      loads and refuses a bare `double` under Visual Studio MSBuild or Mono, whichever
+      builds a Xamarin head
 - [ ] 1.9 `Rinzler78.Templates` — release check asserting the published version matches
       the `PublicAPI.Unshipped.txt` diff — an empty diff a patch, an additive diff a
       minor, a removed or reshaped member a major, or a minor before 1.0.0, whatever
@@ -381,7 +397,7 @@ nuget.org from one. 1.11a and 1.12 also use a private one, to show the private c
       analysers, and the HERE non-affiliation fragment, required in `<Description>` and in each package
       `README.md`, all declared through the
       generic mechanisms of `Rinzler78.Build` as extended by 1.8e, declaring the layers that own their surface and enabling the
-      bare `double` analyser and the architecture check, with the rule that a wrapper holds exactly
+      bare `double` check and the architecture check, with the rule that a wrapper holds exactly
       one ecosystem package reference and no `ProjectReference` crosses a repository
       boundary.
       Done when: a scratch consumer violating the vocabulary, a forbidden dependency,
