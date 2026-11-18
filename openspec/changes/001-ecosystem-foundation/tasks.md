@@ -154,14 +154,24 @@ nuget.org from one. 1.11a and 1.12 also use a private one, to show the private c
       generated repository is 1.11f. The measure is the trimmed managed payload in
       `TrimMode` partial, not a WASM payload or an IPA, and it is recorded by a local
       `--write`; `quality` says so. Delivered by `Rinzler78.Toolkit` pull request #24
-- [ ] 1.8d `Rinzler78.Templates` and `Rinzler78.Build` — the Release and Debug
+- [x] 1.8d `Rinzler78.Templates` and `Rinzler78.Build` — the Release and Debug
       optimisation properties of `toolchain`: Debug unoptimised with full symbols,
       Release with every optimisation the project supports (R8, AOT, LLVM, WASM AOT,
       Brotli), the costly ones never on a feature-branch pull request, and `AndroidFastDeploymentType`.
       The `Rinzler78.Build` part is published by 1.8f.
       Done when: a scratch project's Debug build is unoptimised, its Release build
       enables them, and a feature-branch build skips the costly ones; checked against a
-      locally packed `Rinzler78.Build` until 1.8f publishes it
+      locally packed `Rinzler78.Build` until 1.8f publishes it.
+      Proven by evaluating the properties of a scratch project for each platform
+      (Android, Xamarin.Android, iOS, Xamarin.iOS, Blazor WebAssembly, server) in Debug
+      and Release, with and without `RinzlerCostlyOptimisations`: no platform workload
+      is installed, so nothing was compiled, and the first real application build is
+      1.11f. The specification named `AndroidFastDeploymentType=AssembliesOnly`, which is
+      not a value; it takes `Assemblies`, and only on Xamarin.Android, so `toolchain`
+      is corrected. The generated `ci.yml` turns the costly ones off unless the pull
+      request targets `master`; the library pull requests do not package an application,
+      so they take effect where one is built. Delivered by `Rinzler78.Toolkit` pull
+      request #25
 - [ ] 1.8e `Rinzler78.Build` — the generic mechanisms `Here.Sdk.Build` (1.13) declares
       against, which Build lacks today: a required README fragment, a rule that no
       `ProjectReference` crosses a repository boundary, an analyser failing a bare
