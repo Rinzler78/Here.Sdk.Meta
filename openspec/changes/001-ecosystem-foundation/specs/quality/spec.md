@@ -67,13 +67,27 @@ are reflection-driven, and marking them would invite complacent suppressions.
 
 ### Requirement: The trimming benefit is measured, not declared
 
-Every `Committed` library SHALL publish, in its `README.md`, the WASM payload or
-IPA size produced by CI with and without the library marked.
+Every `Committed` library SHALL record, in its `README.md`, the size in bytes of the
+library and of the managed payload of its trimming test application, published trimmed
+in `TrimMode` partial (the mode Blazor WebAssembly and iOS apply; the trimmer's own
+default, `full`, trims every assembly and shows marking no benefit) with and without
+the library marked. The sizes are recorded by a local `--write`: CI holds a token that
+cannot commit. The promotion pull request into `master` SHALL re-measure, compile the
+application ahead of time, post the sizes on the pull request, and fail when the marked
+library exceeds the record by more than 5 %, when marking trims nothing, or when the
+record is absent or unreadable. The payload is recorded as information and does not
+gate: five percent of a framework is a hundred times a library. A WASM payload or an
+IPA size belongs to the head that builds one.
 
 #### Scenario: the README carries a number
-- **GIVEN** the CI run of a `Committed` library
-- **WHEN** it completes
-- **THEN** the measured sizes are written to the README and the change is committed
+- **GIVEN** a `Committed` library and its trimming test application
+- **WHEN** `scripts/trimming.sh --write` runs
+- **THEN** the measured sizes are written to the README block, and nothing around it changes
+
+#### Scenario: a size regression fails the promotion
+- **GIVEN** a promotion pull request into `master` whose marked library is more than 5 % over the README's record
+- **WHEN** the trimming workflow runs
+- **THEN** it fails, and the measured sizes are posted on the pull request beside the recorded ones
 
 
 ### Requirement: Coverage gates the diff, not the file
