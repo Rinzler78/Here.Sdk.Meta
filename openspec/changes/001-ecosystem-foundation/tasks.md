@@ -174,11 +174,11 @@ nuget.org from one. 1.11a and 1.12 also use a private one, to show the private c
       request #25
 - [x] 1.8e `Rinzler78.Build` — the generic mechanisms `Here.Sdk.Build` (1.13) declares
       against, which Build lacks today: a required README fragment, a rule that no
-      `ProjectReference` crosses a repository boundary, an analyser failing a bare
+      `ProjectReference` crosses a repository boundary, a check failing a bare
       `double` in the public API of a layer that owns its surface, and an architecture
       check on the compiled assemblies, a suppression without a written justification, a Reduced or Exempt coverage contract
-      without an ADR, detected by a project property naming the ADR file (test
-      projects, Exempt by construction in the templates, excepted by `quality`), and
+      without an ADR, detected by a project property naming the ADR file (excepted by `quality`
+      for a project shipping no package: a test project, a trimming application), and
       the named platform target-framework sets `package-topology` requires (Xamarin
       monikers, `-android`, `-ios`, Windows, Mac Catalyst), besides the
       `PackageReference` check it has.
@@ -397,7 +397,7 @@ nuget.org from one. 1.11a and 1.12 also use a private one, to show the private c
       analysers, and the HERE non-affiliation fragment, required in `<Description>` and in each package
       `README.md`, all declared through the
       generic mechanisms of `Rinzler78.Build` as extended by 1.8e, declaring the layers that own their surface and enabling the
-      bare `double` analyser and the architecture check, with the rule that a wrapper holds exactly
+      bare `double` check and the architecture check, with the rule that a wrapper holds exactly
       one ecosystem package reference and no `ProjectReference` crosses a repository
       boundary.
       Done when: a scratch consumer violating the vocabulary, a forbidden dependency,
