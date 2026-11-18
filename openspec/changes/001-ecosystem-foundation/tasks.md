@@ -137,14 +137,23 @@ nuget.org from one. 1.11a and 1.12 also use a private one, to show the private c
       A report of another checkout is refused, never read as nothing to cover.
       Delivered by `Rinzler78.Toolkit` pull request #23. The check that a `Reduced` or
       `Exempt` project cites an ADR is 1.8e
-- [ ] 1.8c `Rinzler78.Templates` — the `Committed` trimming measurement written to the
+- [x] 1.8c `Rinzler78.Templates` — the `Committed` trimming measurement written to the
       `README.md`, and the full gate on a pull request into `master`: AOT, measured
       sizes posted on the pull request.
       The pull request into `master` also runs the UI and end-to-end tests of 8.3 and 8.4
-      once they exist.
+      once they exist; adding them to that pull request is the work of those tasks.
       Done when: a scratch `Committed` library posts its sizes, and a size regression
       fails the promotion pull request; checked against a locally packed `Rinzler78.Build`
-      until 1.8f publishes it
+      until 1.8f publishes it.
+      Proven on a regenerated `Committed` library with a locally packed `Rinzler78.Build`:
+      `scripts/trimming.sh --write --aot` records the sizes, `--check --aot` holds under a
+      locked restore, and a change that makes the application reach most of the library
+      fails with "the marked library weighs 30720 bytes, 5120 recorded". The
+      `trimming.yml` of the library template, which restores locked, compiles ahead of
+      time, runs the check and posts the sizes, has not run on GitHub: its first run in a
+      generated repository is 1.11f. The measure is the trimmed managed payload in
+      `TrimMode` partial, not a WASM payload or an IPA, and it is recorded by a local
+      `--write`; `quality` says so. Delivered by `Rinzler78.Toolkit` pull request #24
 - [ ] 1.8d `Rinzler78.Templates` and `Rinzler78.Build` — the Release and Debug
       optimisation properties of `toolchain`: Debug unoptimised with full symbols,
       Release with every optimisation the project supports (R8, AOT, LLVM, WASM AOT,
@@ -318,7 +327,10 @@ nuget.org from one. 1.11a and 1.12 also use a private one, to show the private c
       since the script requires `promotion-source` and the reviewer checks; and the tag
       comes last.
       Done when: the script's verification mode reports the Toolkit conforming, the
-      tag publishes, and the dispatch step runs and reaches `Meta`
+      tag publishes, and the dispatch step runs and reaches `Meta`; and a scratch
+      repository generated from the published templates runs the pull-request gates of
+      1.8b and 1.8c once, the second with a `Committed` library whose sizes are posted on
+      its promotion pull request and whose regression fails it
 - [ ] 1.12a Decision, taken before 1.12 because 1.12 relies on it: how a private repository of the extraction publishes `alpha.N`
       without the `release` environment and the rulesets its plan cannot apply. The
       runbook shows that a nuget.org policy without an environment lets any ref carrying
